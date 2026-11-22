@@ -15,6 +15,8 @@ const GARN={"chicken breast":"🍗","chicken thighs":"🍗","shrimp":"🍤","sal
 const GF={soup:"Cold nights, sick days, leftovers",comfort:"Cozy dinners, chilly nights, leftovers",light:"Fresh dinners, lighter nights",lunch:"Easy lunches, work-from-home days",quick:"Busy weeknights, low-energy days",prep:"Meal prep, batch cooking",breakfast:"Slow mornings, brunch at home",treats:"Dessert's own stomach, movie nights"};
 const SKIP=new Set(["warm water","water"]);
 CATS.sides={n:"Sides & starters",e:"🥗",g:["#DCE6C4","#6F8A4A"]};
+CATS.baking={n:"Baking & breads",e:"🥖",g:["#EBCB9A","#9A5B2E"]};CATS.wraps={n:"Wraps & rolls",e:"🌯",g:["#CFE3C2","#4F7A5A"]};
+GF.baking="Fresh bread, weekend baking, breakfast on the go";GF.wraps="Lunch on the go, easy dinners, leftovers";
 GF.sides="Sides, starters, potlucks";
 PARTS[7]="Part 7 · Around the world";PARTS[8]="Our own recipes";
 const MINE_P=8;
@@ -49,14 +51,15 @@ const pad=n=>String(n).padStart(2,"0");
 const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const fromIso=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d,12)};
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const curMon=()=>{const d=new Date();return mondayOf(d.getDay()===0?addDays(d,1):d)};
 const mondayOf=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),12);return addDays(x,-((x.getDay()+6)%7))};
 const todayIso=()=>iso(new Date());
 const weekDates=w=>{const m=fromIso(w);return[0,1,2,3,4,5,6].map(k=>iso(addDays(m,k)))};
 const nice=s=>{const d=fromIso(s);return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})};
 /* ---------- state ---------- */
 const KEY="roses-eats-v1";
-function fresh(){return{v:1,mine:[],left:[],log:[],soon:[],timers:[],fav:[],cooked:[],basket:{},pantry:["salt","black pepper","olive oil","vegetable oil"],plan:{},checked:{},extras:[],tk:{},rating:{},notes:{},hidden:[],photos:{},gone:{},myIng:[],thr:65,maxMiss:5,gmode:"all",hidePantry:true,night:false,week:iso(mondayOf(new Date()))}}
-function load(){let d=null;try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}const f=fresh();if(!d||typeof d!=="object")return f;const s=Object.assign(f,d);s.week=iso(mondayOf(new Date()));["hidden","myIng"].forEach(k=>{if(!Array.isArray(s[k]))s[k]=[]});["photos","gone"].forEach(k=>{if(!s[k]||typeof s[k]!=="object")s[k]={}});return s}
+function fresh(){return{v:1,mine:[],left:[],log:[],soon:[],timers:[],fav:[],cooked:[],basket:{},pantry:["salt","black pepper","olive oil","vegetable oil"],plan:{},checked:{},extras:[],tk:{},rating:{},notes:{},hidden:[],photos:{},gone:{},myIng:[],thr:65,maxMiss:5,gmode:"all",hidePantry:true,night:false,week:iso(curMon())}}
+function load(){let d=null;try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}const f=fresh();if(!d||typeof d!=="object")return f;const s=Object.assign(f,d);s.week=iso(curMon());["hidden","myIng"].forEach(k=>{if(!Array.isArray(s[k]))s[k]=[]});["photos","gone"].forEach(k=>{if(!s[k]||typeof s[k]!=="object")s[k]={}});return s}
 let S=load();let saveWarned=false;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){if(!saveWarned){saveWarned=true;toast("Heads up: this browser isn't saving changes")}}}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -188,7 +191,7 @@ function pdList(L){return L.map(x=>`<button class="prow" data-a="pdPick" data-id
 V.plan=()=>{const dates=weekDates(S.week);const wk=weekEntries(S.week);const serv=wk.reduce((a,e)=>a+e.s,0);const t=todayIso();
 return`<h1 class="h1">This Week's Menu</h1>
 <div class="card"><div class="weeknav"><button class="btn sm ghost" data-a="wk" data-v="-1">‹ Prev</button><div class="wl">${nice(dates[0])} – ${nice(dates[6])}</div><button class="btn sm ghost" data-a="wk" data-v="1">Next ›</button></div>
-<div class="row sb" style="margin-top:10px"><span><b>${wk.length}</b> meal${wk.length===1?"":"s"} · <b>${serv}</b> servings</span>${S.week!==iso(mondayOf(new Date()))?`<button class="link" data-a="wk" data-v="0">Today</button>`:""}</div>
+<div class="row sb" style="margin-top:10px"><span><b>${wk.length}</b> meal${wk.length===1?"":"s"} · <b>${serv}</b> servings</span>${S.week!==iso(curMon())?`<button class="link" data-a="wk" data-v="0">Today</button>`:""}</div>
 <button class="btn full big" style="margin-top:10px" data-a="showList" ${wk.length?"":"disabled"}>🛒 Show grocery list for all meals selected</button>
 <div class="row g8 wrap"><button class="btn sm ghost" data-a="fillWeek">🎲 Fill empty days with dinners</button><button class="btn sm ghost" data-a="copyLast">↻ Copy last week</button>${wk.length?`<button class="btn sm ghost" data-a="clearWeek">🗑 Clear week</button>`:""}</div></div>
 ${dates.map((d,k)=>{const E=S.plan[d]||[];return`<div class="card day ${d===t?"today":""}"><div class="row sb"><div class="dn">${DAYS[k]}<small>${nice(d)}</small>${d===t?`<span class="pill">Today</span>`:""}</div><button class="btn sm" data-a="planDlg" data-date="${d}">＋ Add</button></div>
@@ -221,7 +224,7 @@ function vHave(){return`<div class="card small">Tap everything that's in the fri
 <div class="chips"><button class="chip ${kAisle==="all"?"on":""}" data-a="kaisle" data-k="all">All aisles</button>${AISLES.filter(a=>ALLITEMS.some(x=>secOf(x)===a[0])).map(([k,n])=>`<button class="chip ${kAisle===k?"on":""}" data-a="kaisle" data-k="${k}">${n}</button>`).join("")}</div>
 <div class="seg" style="margin:6px 0 8px"><button class="${kMode==="have"?"on":""}" data-a="kmode" data-k="have">Tap = we have it</button><button class="${kMode==="soon"?"on":""}" data-a="kmode" data-k="soon">Tap = use it soon ⏰</button></div>${(S.soon||[]).length?`<div class="mut small">⏰ Use soon: ${S.soon.map(esc).join(", ")}</div>`:""}<div class="row g8 wrap" style="margin:4px 0 12px"><button class="btn sm sage" data-a="basics">＋ Mark common basics</button><button class="btn sm ghost" data-a="kclear">Clear all</button></div>
 <div id="klist">${kList()}</div>`}
-function kList(){const q=kQ.trim().toLowerCase();return AISLES.map(([k,n])=>{if(kAisle!=="all"&&kAisle!==k)return"";const it=ALLITEMS.filter(x=>secOf(x)===k&&(!q||x.includes(q)));if(!it.length)return"";return`<div class="gsec"><div class="gsh">${n}<span>${it.filter(inP).length}/${it.length}</span></div><div class="kchips">${it.map(x=>`<button class="kc ${inP(x)?"on":""} ${(S.soon||[]).includes(x)?"soon":""}" data-a="ktog" data-it="${esc(x)}">${(S.soon||[]).includes(x)?"⏰ ":inP(x)?"✓ ":""}${esc(x)}</button>`).join("")}</div></div>`}).join("")||`<div class="empty">No ingredients match "${esc(kQ)}"<br><button class="btn sm" style="margin-top:10px" data-a="addIngQ" data-v="${esc(kQ.trim())}">＋ Add “${esc(kQ.trim())}” as something we have</button></div>`}
+function kList(){const q=kQ.trim().toLowerCase();const mine=new Set([...S.pantry,...(S.soon||[])]);const pool=q?ALLITEMS:ALLITEMS.filter(x=>mine.has(x));if(!q&&!pool.length)return`<div class="empty">Nothing marked yet. Search above to find an ingredient, or tap <b>Mark common basics</b>.</div>`;return AISLES.map(([k,n])=>{if(kAisle!=="all"&&kAisle!==k)return"";const it=pool.filter(x=>secOf(x)===k&&(!q||x.includes(q)));if(!it.length)return"";return`<div class="gsec"><div class="gsh">${n}<span>${it.filter(inP).length}/${it.length}</span></div><div class="kchips">${it.map(x=>`<button class="kc ${inP(x)?"on":""} ${(S.soon||[]).includes(x)?"soon":""}" data-a="ktog" data-it="${esc(x)}">${(S.soon||[]).includes(x)?"⏰ ":inP(x)?"✓ ":""}${esc(x)}</button>`).join("")}</div></div>`}).join("")||`<div class="empty">No ingredients match "${esc(kQ)}"<br><button class="btn sm" style="margin-top:10px" data-a="addIngQ" data-v="${esc(kQ.trim())}">＋ Add “${esc(kQ.trim())}” as something we have</button></div>`}
 function vMake(ready,near){return`${S.pantry.length<=6?`<div class="card" style="background:var(--rose2)">👋 Start in <b>What we have</b> and tap what's in the kitchen. Right now it only knows about ${S.pantry.map(esc).join(", ")||"nothing"}.<div class="row g8"><button class="btn sm" data-a="kseg" data-k="have">Mark what we have</button></div></div>`:""}
 <div class="card"><div class="row sb"><b>Show "almost there" at</b><b style="color:var(--acc)" id="thrV">${S.thr}%+</b></div><input type="range" min="40" max="95" step="5" value="${S.thr}" data-in="thr" data-ch="thr2"><div class="row sb small"><span class="mut">and missing no more than</span><select class="inp" style="width:120px;padding:7px 28px 7px 10px;font-size:14px" data-ch="maxm">${[1,2,3,4,5].map(n=>`<option value="${n}" ${S.maxMiss===n?"selected":""}>${n} item${n>1?"s":""}</option>`).join("")}</select></div></div>
 ${(()=>{const so=S.soon||[];if(!so.length)return"";const U=ready.concat(near).map(m=>({m,u:m.r.keys.filter(k=>so.includes(k))})).filter(x=>x.u.length).sort((a,b)=>b.u.length-a.u.length||a.m.miss.length-b.m.miss.length).slice(0,6);return`<div class="h2">⏰ Use it up before it goes bad <span class="cnt">${U.length}</span></div>`+(U.length?U.map(x=>mkCard(x.m,!x.m.miss.length,x.u)).join(""):`<div class="empty">Nothing uses ${so.map(esc).join(", ")} yet. Try lowering the % below.</div>`)})()}<div class="h2">🎉 Ready with what you have <span class="cnt">${ready.length}</span></div>
@@ -318,7 +321,7 @@ pdSave:()=>{if(!pd.id)return;if(pd.uid){for(const d of Object.keys(S.plan)){cons
 pdDel:()=>{delEntry(pd.date,pd.uid);closeSheet()},
 peEdit:el=>{const e=(S.plan[el.dataset.date]||[]).find(x=>x.uid===el.dataset.u);if(e)planDlg(0,null,{...e,date:el.dataset.date,q:""})},
 peDel:el=>{delEntry(el.dataset.date,el.dataset.u);render(true)},
-wk:el=>{const v=+el.dataset.v;S.week=v?iso(addDays(fromIso(S.week),7*v)):iso(mondayOf(new Date()));render(true)},
+wk:el=>{const v=+el.dataset.v;S.week=v?iso(addDays(fromIso(S.week),7*v)):iso(curMon());render(true)},
 showList:()=>{go("groceries")},
 fillWeek:()=>{const dates=weekDates(S.week);const used=new Set(weekEntries(S.week).map(e=>e.id));const pool=RECIPES.filter(r=>["soup","comfort","light","quick","prep"].includes(r.c)&&!used.has(r.id)).sort(()=>Math.random()-.5);let n=0;dates.forEach(d=>{if(!(S.plan[d]||[]).length){const r=pool.pop();if(r){S.plan[d]=[{uid:uid(),id:r.id,s:r.s,m:"D"}];n++}}});save();toast(n?`Added ${n} dinner${n>1?"s":""} 🎲`:"Every day already has something!");render(true)},
 clearWeek:()=>confirmDlg("Clear this whole week?","Every planned meal from Monday to Sunday will be removed.","Yes, clear the week",()=>{weekDates(S.week).forEach(d=>delete S.plan[d]);delete S.checked[S.week];save();closeSheet();toast("Week cleared")}),
