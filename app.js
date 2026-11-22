@@ -18,9 +18,26 @@ CATS.sides={n:"Sides & starters",e:"🥗",g:["#DCE6C4","#6F8A4A"]};
 GF.sides="Sides, starters, potlucks";
 PARTS[7]="Part 7 · Around the world";PARTS[8]="Our own recipes";
 const MINE_P=8;
+const MAINS=[["chicken","🍗 Chicken"],["steak","🥩 Steak"],["beef","🍔 Beef"],["pork","🥓 Pork"],["lamb","🍖 Lamb"],["seafood","🦐 Seafood"],["veg","🥦 Vegetarian"],["pasta","🍝 Pasta"],["soup","🍲 Soup & stew"],["rice","🍚 Rice & bowls"],["dessert","🍰 Dessert"]];
+function mainOf(r){const n=r.n.toLowerCase(),k=r.keys.join(" | ");const m=new Set();
+if(/chicken|turkey/.test(n+" "+k))m.add("chicken");
+if(/steak|ribeye|sirloin|filet mignon|strip|flank|skirt|porterhouse|t-bone|tenderloin/.test(n)||/sirloin|ribeye|flank steak|skirt steak|strip steak|filet mignon|beef tenderloin/.test(k))m.add("steak");
+if(/beef|brisket|oxtail|veal|meatball|burger|meatloaf|bolognese|chili/.test(n+" "+k))m.add("beef");
+if(/pork|bacon|ham\b|sausage|chorizo|prosciutto|pancetta|carnitas|char siu/.test(n+" "+k))m.add("pork");
+if(/lamb|mutton|goat/.test(n+" "+k))m.add("lamb");
+if(/shrimp|prawn|salmon|cod|tuna|fish|crab|lobster|scallop|mussel|clam|squid|calamari|anchov|tilapia|catfish|crawfish|seafood|haddock|mackerel|sardine|trout/.test(n+" "+k))m.add("seafood");
+if(r.c==="treats")m.add("dessert");
+if(r.c==="soup"||/soup|stew|chili|chowder|bisque|gumbo|pho|ramen|jjigae|curry/.test(n))m.add("soup");
+if(/pasta|spaghetti|penne|linguine|fettuccine|lasagn|macaroni|ziti|rigatoni|gnocchi|tortellini|ravioli|orzo|noodle|shells|carbonara|alfredo|lo mein|chow mein|pad thai/.test(n+" "+k))m.add("pasta");
+if(/rice|bowl|risotto|biryani|paella|jambalaya|congee|bibimbap|donburi|gyudon|oyakodon/.test(n))m.add("rice");
+if(!["chicken","steak","beef","pork","lamb","seafood"].some(x=>m.has(x))&&r.c!=="treats")m.add("veg");
+return[...m]}
 function finishR(r){const g=[];for(const x of r.i){const em=GARN[x.item];if(em&&em!==r.e&&!g.includes(em))g.push(em);if(g.length===3)break}while(g.length<3)g.push(["🌿","✨","🍽️"][g.length]);r.g=g;r.keys=[...new Set(r.i.map(x=>x.item).filter(x=>x&&!SKIP.has(x)))];if(!r.keys.length)r.keys=["(no ingredients)"];return r}
 const BASE=ORIG.concat(RAW.slice(45)).map((a,i)=>finishR({id:i+1,n:a[0],c:a[1],e:a[2],t:a[3],df:typeof a[4]==="number"?DIFF[a[4]]:a[4],cz:a[5],s:a[6],d:a[7],i:a[8].split(";").map(parseIng),st:a[9].split("|"),hot:a[10]==="hot",gf:a[11]||GF[a[1]],h:a[12]||"",p:i<21?1:i<45?2:i<69?3:i<93?4:i<117?5:6,img:(typeof ORIG_IMG!=="undefined"&&ORIG_IMG[i+1])||""}));
+if(typeof NEWR!=="undefined")NEWR.forEach(a=>BASE.push(finishR({id:a[0],n:a[1],c:a[2],e:a[3],t:a[4],df:a[5],cz:a[6],s:a[7],d:a[8],i:a[9].split(";").map(parseIng),st:a[10].split("|"),hot:false,gf:GF[a[2]],h:"",p:7,img:"",cu:a[11]||""})));
 if(typeof WORLD!=="undefined")WORLD.forEach(a=>BASE.push(finishR({id:a[0],n:a[1],c:a[2],e:a[3],t:a[4],df:a[5],cz:a[6],s:a[7],d:a[8],i:a[9].split(";").map(parseIng),st:a[10].split("|"),hot:false,gf:GF[a[2]],h:"",p:7,img:a[11],cu:a[12]||""})));
+const CU_FIX={"United States":"American",France:"French",India:"Indian",Netherlands:"Dutch",Norway:"Norwegian",Colombia:"Colombian",Brazil:"Brazilian",Argentina:"Argentinian",Venezuela:"Venezuelan",Chile:"Chilean",Bulgaria:"Bulgarian",Albania:"Albanian",Croatian:"Croatian",Denmark:"Danish",Belgium:"Belgian",Cuba:"Cuban",Estonia:"Estonian",Slovakia:"Slovak",Laos:"Lao",Armenia:"Armenian",Austria:"Austrian",Andorra:"Andorran",Bangladesh:"Bangladeshi",Angola:"Angolan",Azerbaijan:"Azerbaijani",Afghanistan:"Afghan",Cambodia:"Cambodian",Dominica:"Dominican","Costa Rica":"Costa Rican",Botswana:"Botswanan",Aruba:"Aruban",Barbados:"Barbadian","Cayman Islands":"Caymanian","Antigua and Barbuda":"Antiguan",Bahamas:"Bahamian","Saudi Arabian":"Saudi"};
+BASE.forEach(r=>{if(r.id<1000&&typeof ORIG_CU!=="undefined")r.cu=ORIG_CU[r.id]||"American";r.cu=CU_FIX[r.cu]||r.cu;if(typeof PHOTO!=="undefined"&&PHOTO[r.id])r.img=PHOTO[r.id];r.mn=mainOf(r)});
 const RECIPES=[];const RID={};
 const R_=id=>RID[id];
 let ALLITEMS=[];
@@ -107,23 +124,28 @@ ${today.length?today.map(e=>{const r=R_(e.id);return r?`<div class="tn"><div cla
 ${leftCard()}
 <div class="h2 sb">Tonight, keep it easy<button class="link" data-a="homeMore" data-k="30">See all</button></div><div class="strip">${easy.map(card).join("")}</div>
 <div class="h2 sb">🌍 Around the world<button class="link" data-a="homeMore" data-p="7">See all</button></div><div class="strip">${world.map(card).join("")}</div>
+<div class="h2">Browse by cuisine</div><div class="chips cuz">${["Egyptian","Chinese","Mexican","Italian","American","Indian","Thai","Korean","Japanese","Greek","Southern","Lebanese"].filter(c=>RECIPES.some(r=>r.cu===c)).map(c=>`<button class="chip" data-a="homeMore" data-cu="${c}">${c}</button>`).join("")}</div>
+<div class="chips cuz">${MAINS.map(([k,n])=>`<button class="chip" data-a="homeMore" data-mn="${k}">${n}</button>`).join("")}</div>
 <div class="h2 sb">🍪 Something sweet<button class="link" data-a="homeMore" data-c="treats">See all</button></div><div class="strip">${sweet.map(card).join("")}</div>
 <div class="hfoot"><button data-a="go" data-t="recipes"><b>${RECIPES.length}</b> recipes</button><button data-a="favs"><b>${S.fav.length}</b> favorites</button><button data-a="go" data-t="pantry"><b>${S.pantry.length}</b> in pantry</button></div>
 <section class="rulec" data-a="rule"><small>Rose's Kitchen Rule #<span id="rn">${ruleI+1}</span> · tap for another</small><div id="rt">${RULES[ruleI]}</div></section>
 <div class="center mut small" style="margin:14px 0 6px">Made with ♡ for Rose</div>`};
 function spin(){if(spinning)return;spinning=true;const out=$("#spinOut");let n=0,delay=45;const pool=RECIPES.filter(r=>r.id!==lastPick&&(!isCooked(r.id)||Math.random()<.2));const tick=()=>{const r=pool[Math.floor(Math.random()*pool.length)];out.innerHTML=`<div class="card spinbox rolling" style="margin-top:12px">${mini(r,1)}<b style="font-family:var(--serif);font-size:17px">${esc(r.n)}</b></div>`;n++;delay*=1.13;if(n<20)setTimeout(tick,delay);else{spinning=false;lastPick=r.id;out.innerHTML=`<div class="card" style="margin-top:12px;padding:0;overflow:hidden"><div style="height:150px">${art(r)}</div><div style="padding:14px"><div class="mut small">The next one is…</div><div style="font:700 22px var(--serif);margin:2px 0 10px">${esc(r.n)}</div><div class="row g8 wrap" style="margin-top:0"><button class="btn sm" data-a="open" data-id="${r.id}">See recipe</button><button class="btn sm ghost" data-a="planDlg" data-id="${r.id}" data-date="${todayIso()}">＋ Plan it</button><button class="btn sm ghost" data-a="spin">🎲 Spin again</button></div></div></div>`;confetti()}};tick()}
 /* ---------- RECIPES ---------- */
-const F={q:"",cat:"all",part:0,time:0,fav:false,lim:24};
+const F={q:"",cat:"all",part:0,time:0,fav:false,lim:24,cu:"",mn:""};
 function card(r){const f=isFav(r.id);return`<div class="rc"><div data-a="open" data-id="${r.id}" style="cursor:pointer">${art(r)}${r.hot?`<span class="tag">🔥 TikTok</span>`:r.p===1?`<span class="tag">★ Original</span>`:""}<div class="meta"><div class="rm">${r.cu?esc(r.cu)+" · ":""}${CATS[r.c].n} · ${r.t>=120?Math.round(r.t/60)+" hr":r.t+" min"}</div><div class="rn">${esc(r.n)}</div></div></div>${isCooked(r.id)?`<span class="ck-tag">Cooked ✓</span>`:""}<button class="hrt" data-a="fav" data-id="${r.id}" aria-label="Favorite">${f?"♥":"♡"}</button><div class="meta" style="padding-top:0"><div class="ra"><button class="${inBasket(r.id)?"on":""}" data-a="basket" data-id="${r.id}">${inBasket(r.id)?"✓ In list":"🛒 Select"}</button><button data-a="planDlg" data-id="${r.id}">＋ Plan</button></div></div></div>`}
-function filtered(){const q=F.q.trim().toLowerCase();return RECIPES.filter(r=>(F.cat==="all"||r.c===F.cat)&&(!F.part||r.p===F.part)&&(!F.time||r.t<=F.time)&&(!F.fav||isFav(r.id))&&(!q||r.n.toLowerCase().includes(q)||r.d.toLowerCase().includes(q)||(r.cu||"").toLowerCase().includes(q)||CATS[r.c].n.toLowerCase().includes(q)||r.keys.some(k=>k.includes(q))))}
+function filtered(){const q=F.q.trim().toLowerCase();return RECIPES.filter(r=>(F.cat==="all"||r.c===F.cat)&&(!F.cu||r.cu===F.cu)&&(!F.mn||(r.mn||[]).includes(F.mn))&&(!F.part||r.p===F.part)&&(!F.time||r.t<=F.time)&&(!F.fav||isFav(r.id))&&(!q||r.n.toLowerCase().includes(q)||r.d.toLowerCase().includes(q)||(r.cu||"").toLowerCase().includes(q)||CATS[r.c].n.toLowerCase().includes(q)||r.keys.some(k=>k.includes(q))))}
 V.recipes=()=>{const bc=Object.keys(S.basket).length;return`<h1 class="h1">The Menu</h1>
 ${bc?`<div class="card row sb" style="background:var(--rose2)"><span><b>${bc}</b> recipe${bc>1?"s":""} selected for groceries</span><span class="row" style="gap:4px"><button class="btn sm" data-a="go" data-t="groceries">Groceries →</button><button class="btn sm ghost" data-a="clearBasket">Clear</button></span></div>`:""}
 <div class="row g8" style="margin:0 0 10px"><button class="btn" style="flex:1" data-a="addMine">⭐ Add a recipe</button><button class="btn ghost" style="flex:1" data-a="tkSearch">🎵 Search TikTok</button></div>
 <input class="search" placeholder="Search recipes or ingredients (try 'chicken')" value="${esc(F.q)}" data-in="rq" type="search">
 <div class="chips">${[["all","All"],...Object.entries(CATS).map(([k,c])=>[k,c.e+" "+c.n])].map(([k,n])=>`<button class="chip ${F.cat===k?"on":""}" data-a="fcat" data-k="${k}">${n}</button>`).join("")}</div>
+<div class="chips mains">${[["","Everything"],...MAINS].map(([k,n])=>`<button class="chip ${F.mn===k?"on":""}" data-a="fmn" data-k="${k}">${n}</button>`).join("")}</div>
+<div class="filters"><select class="inp" data-ch="fcu"><option value="">🌍 Any cuisine</option>${cuList().map(([c,n])=>`<option value="${esc(c)}" ${F.cu===c?"selected":""}>${esc(c)} (${n})</option>`).join("")}</select></div>
 <div class="filters"><select class="inp" data-ch="fpart"><option value="0">All parts</option>${[1,2,3,4,5,6,7,8].filter(p=>p<MINE_P||(S.mine||[]).length).map(p=>`<option value="${p}" ${F.part===p?"selected":""}>${PARTS[p]}</option>`).join("")}</select><select class="inp" data-ch="ftime"><option value="0">Any time</option>${[15,20,30,45,60].map(t=>`<option value="${t}" ${F.time===t?"selected":""}>${t} min or less</option>`).join("")}</select></div>
 <div class="row sb" style="margin-top:10px"><label class="toggle" style="padding:0"><span class="sw"><input type="checkbox" data-ch="ffav" ${F.fav?"checked":""}><span></span></span>Favorites only</label><button class="link" data-a="resetF">Reset filters</button></div>
 <div id="tkHint"></div><div class="mut small" id="rcnt" style="margin-top:8px"></div><div class="grid" id="rgrid"></div><div id="rmore"></div>`};
+function cuList(){const c={};RECIPES.forEach(r=>{if(r.cu)c[r.cu]=(c[r.cu]||0)+1});return Object.entries(c).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))}
 function fillGrid(){const L=filtered();const q=F.q.trim();$("#tkHint").innerHTML=q?`<button class="tkbar" data-a="tkGo" data-q="${esc(q)}">🎵 Can't find it? Search “${esc(q)}” on TikTok</button>`:"";$("#rcnt").textContent=L.length+" recipe"+(L.length===1?"":"s");$("#rgrid").innerHTML=L.length?L.slice(0,F.lim).map(card).join(""):`<div class="empty" style="grid-column:1/-1">No matches. Rose would still eat something though.<br><button class="btn sm" style="margin-top:10px" data-a="resetF">Reset filters</button></div>`;$("#rmore").innerHTML=L.length>F.lim?`<button class="btn ghost more" data-a="moreR">Show more (${L.length-F.lim} left)</button>`:""}
 /* ---------- DETAIL ---------- */
 let det=null,sheetKind=null;
@@ -132,7 +154,7 @@ function closeSheet(){$("#shw").classList.remove("open");$("#shw").style.zIndex=
 function openDetail(id){const r=R_(id);det={id,s:r.s,tk:false};sheet(dDetail(),"detail");$("#sheet").scrollTop=0}
 function rerSheet(){if(!sheetKind)return;const sc=$("#sheet").scrollTop;if(sheetKind==="detail")$("#sheetIn").innerHTML=dDetail();else if(sheetKind==="plan")$("#sheetIn").innerHTML=dPlan();$("#sheet").scrollTop=sc}
 function dDetail(){const r=R_(det.id),c=CATS[r.c],f=det.s/r.s,st=stats(r),rt=S.rating[r.id]||0;const custom=!!S.tk[r.id];
-return`<div class="d-art">${art(r)}</div><div class="d-body">
+return`<div class="d-art">${art(r)}</div>${!S.photos[r.id]&&typeof PHOTO_SRC!=="undefined"&&PHOTO_SRC[r.id]?`<div class="pcred">Photo: ${esc(PHOTO_SRC[r.id])}</div>`:""}<div class="d-body">
 <div class="d-cat">${r.mine?"⭐ Our own recipe":r.p===7?"🌍 "+(r.cu?esc(r.cu)+" · ":"")+"Around the world":PARTS[r.p].split(" · ")[0]} · ${c.e} ${c.n}${r.hot?" · 🔥 TikTok famous":""}</div>
 <h2 class="d-t">${esc(r.n)}</h2><p class="d-desc">${esc(r.d)}</p>
 <div class="d-meta"><span>⏱ ${r.t>=120?Math.round(r.t/60)+" hours":r.t+" min"}</span><span>🔥 ${r.cz}/10 cozy</span><span>📶 ${r.df}</span><span>💛 ${esc(r.gf)}</span><span>🧺 have ${st.have}/${st.tot}</span>${isCooked(r.id)?"<span>✅ Cooked</span>":""}</div>
@@ -275,7 +297,8 @@ cooked:el=>{const id=+el.dataset.id;const on=togArr(S.cooked,id);save();toast(on
 basket:el=>{const id=+el.dataset.id;if(inBasket(id))delete S.basket[id];else{S.basket[id]=R_(id).s;unGone(id)}save();toast(inBasket(id)?"Added to grocery selection 🛒":"Removed from grocery selection");after()},
 clearBasket:()=>{S.basket={};save();render(true)},
 fcat:el=>{F.cat=el.dataset.k;F.lim=24;render(true)},
-resetF:()=>{Object.assign(F,{q:"",cat:"all",part:0,time:0,fav:false,lim:24});render(true)},
+fmn:el=>{F.mn=el.dataset.k;F.lim=24;render(true)},
+resetF:()=>{Object.assign(F,{q:"",cat:"all",part:0,time:0,fav:false,lim:24,cu:"",mn:""});render(true)},
 moreR:()=>{F.lim+=24;fillGrid()},
 ds:el=>{det.s=Math.min(24,Math.max(1,det.s+ +el.dataset.v));rerSheet()},
 have:el=>{const it=el.dataset.it;const on=togArr(S.pantry,it);save();toast(on?`${cap(it)} added to pantry`:`${cap(it)} removed from pantry`);rerSheet()},
@@ -330,7 +353,7 @@ const UNITW={cup:"cup",cups:"cup",c:"cup",tbsp:"tbsp",tbs:"tbsp",tablespoon:"tbs
 const UF={"½":.5,"¼":.25,"¾":.75,"⅓":1/3,"⅔":2/3,"⅛":.125};
 function parseFree(line){line=line.trim().replace(/^[-•*]\s*/,"");let q=null,rest=line;const m=line.match(/^(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?\s*[½¼¾⅓⅔⅛]?|[½¼¾⅓⅔⅛])\s*(.*)$/);if(m){const raw=m[1].trim();q=0;raw.split(/\s+/).forEach(p=>{if(UF[p])q+=UF[p];else if(p.includes("/")){const[a,b]=p.split("/");q+=a/b}else{const f=p.match(/^(\d+(?:\.\d+)?)([½¼¾⅓⅔⅛])?$/);if(f){q+=parseFloat(f[1]);if(f[2])q+=UF[f[2]]}}});rest=m[2]}
 const t=rest.split(/\s+/);let u="";if(t.length>1){const w=t[0].toLowerCase().replace(/\.$/,"");if(UNITW[w]){u=UNITW[w];t.shift()}}rest=t.join(" ").replace(/^of\s+/i,"");const[it,...note]=rest.split(",");return{q,u,item:it.trim().toLowerCase(),note:note.join(",").trim()}}
-function mineToR(m){const r={id:m.id,n:m.n,c:CATS[m.c]?m.c:"comfort",e:"⭐",t:+m.t||30,df:m.df||"Easy",cz:+m.cz||9,s:+m.s||4,d:m.d||"One of our own. ♡",i:(m.ing||[]).filter(x=>x.trim()).map(parseFree),st:(m.st||[]).filter(x=>x.trim()),hot:false,gf:m.gf||"Our own recipe",h:"",p:MINE_P,img:m.img||"",mine:true};r.keys=[...new Set(r.i.map(x=>x.item).filter(x=>x&&!SKIP.has(x)))];if(!r.keys.length)r.keys=["(no ingredients)"];return r}
+function mineToR(m){const r={id:m.id,n:m.n,c:CATS[m.c]?m.c:"comfort",e:"⭐",t:+m.t||30,df:m.df||"Easy",cz:+m.cz||9,s:+m.s||4,d:m.d||"One of our own. ♡",i:(m.ing||[]).filter(x=>x.trim()).map(parseFree),st:(m.st||[]).filter(x=>x.trim()),hot:false,gf:m.gf||"Our own recipe",h:"",p:MINE_P,img:m.img||"",mine:true};r.keys=[...new Set(r.i.map(x=>x.item).filter(x=>x&&!SKIP.has(x)))];if(!r.keys.length)r.keys=["(no ingredients)"];r.mn=mainOf(r);return r}
 function syncMine(){RECIPES.length=0;for(const k of Object.keys(RID))delete RID[k];const hid=new Set(S.hidden||[]);BASE.forEach(r=>{RID[r.id]=r;if(!hid.has(r.id))RECIPES.push(r)});(S.mine||[]).forEach(m=>{const r=mineToR(m);RECIPES.push(r);RID[r.id]=r});ALLITEMS=[...new Set(RECIPES.flatMap(r=>r.keys).concat(S.myIng||[]))].filter(x=>x&&x!=="(no ingredients)").sort()}
 const ING_RX=/^(\d|[½¼¾⅓⅔⅛]|a\s|an\s|one\s|two\s|three\s|half\s|pinch|dash|handful|salt|pepper)/i;
 function parsePasted(txt){const L=String(txt||"").split(/\r?\n/).map(x=>x.replace(/^\s*(?:[-•*▢☐▪◦·✔️✅]+|step\s*\d+[:.)]?|\d+[.)](?=\s))\s*/i,"").trim()).filter(x=>x&&!/^(#\S+\s*)+$/.test(x));
@@ -365,7 +388,7 @@ function chime(){try{ensureAudio();const t0=actx.currentTime;for(let r=0;r<3;r++
 function startTimer(mins,label){ensureAudio();S.timers=S.timers||[];S.timers.push({uid:uid(),label:label||"Timer",end:Date.now()+mins*6e4,mins});save();tickTimers();toast(`⏱ ${fmtMin(mins)} timer started`)}
 const fmtMin=m=>m>=60?(Math.floor(m/60)+" hr"+(m%60?" "+Math.round(m%60)+" min":"")):Math.round(m)+" min";
 const mmss=ms=>{ms=Math.max(0,ms);const s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+":"+pad(m):m)+":"+pad(x)};
-function tickTimers(){const T=S.timers||[];const now=Date.now();let fired=false;T.forEach(t=>{if(!t.fired&&t.end<=now){t.fired=1;fired=true}});if(fired){save();chime();toast("⏰ Timer done!")}const bar=$("#tbar");if(!T.length){bar.innerHTML="";bar.classList.remove("on");return}bar.classList.add("on");bar.innerHTML=T.map(t=>`<div class="tchip ${t.fired?"done":""}"><span data-a="timers">⏱ ${esc(t.label)} · <b>${t.fired?"DONE!":mmss(t.end-now)}</b></span><button data-a="tDel" data-u="${t.uid}">✕</button></div>`).join("")}
+function tickTimers(){const T=S.timers||[];const now=Date.now();let fired=false;T.forEach(t=>{if(!t.fired&&t.end<=now){t.fired=1;fired=true}});if(fired)save();const ring=T.filter(t=>t.fired);const al=$("#alarm");if(ring.length){if(now-(tickTimers.last||0)>=4000){tickTimers.last=now;chime()}al.innerHTML=`<div class="al-in"><div class="al-b">⏰</div><div class="al-t">${ring.map(t=>esc(t.label)).join(", ")} ${ring.length>1?"are":"is"} done!</div><button class="btn big full" data-a="tStop">Stop alarm</button></div>`;al.classList.add("on")}else{tickTimers.last=0;al.classList.remove("on");al.innerHTML=""}const bar=$("#tbar");if(!T.length){bar.innerHTML="";bar.classList.remove("on");return}bar.classList.add("on");bar.innerHTML=T.map(t=>`<div class="tchip ${t.fired?"done":""}"><span data-a="timers">⏱ ${esc(t.label)} · <b>${t.fired?"DONE!":mmss(t.end-now)}</b></span><button data-a="tDel" data-u="${t.uid}">✕</button></div>`).join("")}
 setInterval(tickTimers,1000);
 function dTimers(){return`<div class="d-body" style="padding-top:22px"><h2 class="d-t">Kitchen timers</h2><div class="tgrid">${[1,3,5,8,10,12,15,20,25,30,45,60].map(m=>`<button data-a="tQuick" data-v="${m}">${m}<small>min</small></button>`).join("")}</div><p class="mut small">Keep the app open while timers run. iPhones pause web pages in the background, so the chime plays when you come back if it finished.</p>${(S.timers||[]).length?`<button class="btn ghost full" data-a="tClear">Clear all timers</button>`:""}</div>`}
 /* ---- wake lock ---- */
@@ -410,6 +433,7 @@ leftAte:el=>{S.left=S.left.filter(x=>x.uid!==el.dataset.u);save();toast("Yum ✓
 leftToss:el=>{S.left=S.left.filter(x=>x.uid!==el.dataset.u);save();render(true)},
 timers:()=>{const k=ck;sheet(dTimers(),"timers");if(k)$("#shw").style.zIndex=300},
 tQuick:el=>{startTimer(+el.dataset.v,el.dataset.v+" min");closeSheet()},
+tStop:()=>{S.timers=S.timers.filter(t=>!t.fired);save();tickTimers();try{navigator.vibrate&&navigator.vibrate(0)}catch(e){}toast("Alarm stopped")},
 tDel:el=>{S.timers=S.timers.filter(t=>t.uid!==el.dataset.u);save();tickTimers()},
 tClear:()=>{S.timers=[];save();tickTimers();closeSheet()},
 decide:()=>{DZ.seed=Math.random()*1000;sheet(dDecide(),"decide")},
@@ -423,7 +447,7 @@ mineDel:()=>confirmDlg("Delete this recipe?","It comes out of the planner and co
 tiktok:el=>{const r=R_(+el.dataset.id);if(r)tiktokOpen(r)},
 tkGo:el=>tiktokSearch(el.dataset.q),
 tkSearch:el=>{sheet(`<div class="d-body" style="padding-top:22px"><h2 class="d-t">🎵 Search TikTok</h2><p class="mut small">Can't find it in our recipes? Type it here and the TikTok app opens with that search.</p><form data-f="tkS"><input class="inp" id="tkq" placeholder="e.g. marry me chicken" value="${esc(el.dataset.q||F.q||"")}" maxlength="100" enterkeyhint="search"><button class="btn full big" style="margin-top:10px">Open TikTok search</button></form><div class="mut small" style="margin-top:12px">Popular: ${["marry me chicken","cottage cheese recipes","crockpot dinner","viral pasta","easy dessert"].map(q=>`<button class="chip" data-a="tkGo" data-q="${q}">${q}</button>`).join(" ")}</div></div>`,"tks")},
-homeMore:el=>{Object.assign(F,{q:"",cat:el.dataset.c||"all",part:+el.dataset.p||0,time:+el.dataset.k||0,fav:false,lim:24});go("recipes")},
+homeMore:el=>{Object.assign(F,{q:"",cat:el.dataset.c||"all",part:+el.dataset.p||0,time:+el.dataset.k||0,fav:false,lim:24,cu:el.dataset.cu||"",mn:el.dataset.mn||""});go("recipes")},
 gdel:el=>{const k=el.dataset.k;gone()[k]=1;delete chk()[k];save();render(true);toast("Took "+k+" off the list")},
 gRestore:()=>{delete S.gone[S.week];save();render(true)},
 gClear:()=>confirmDlg("Clear the grocery list?","Everything comes off the list. Your planned meals stay in the planner.","Clear the list",()=>{const G=gone();grocery().forEach(e=>G[e.key]=1);S.basket={};S.extras=[];delete S.checked[S.week];save();closeSheet();toast("List cleared ✓")}),
@@ -451,7 +475,7 @@ else if(k==="pdq"){pd.q=el.value;const q=pd.q.trim().toLowerCase();$("#pdl").inn
 else if(k==="note"){S.notes[el.dataset.id]=el.value.slice(0,1200);if(!S.notes[el.dataset.id])delete S.notes[el.dataset.id];clearTimeout(inT);inT=setTimeout(save,400)}
 else if(k==="thr"){S.thr=+el.value;$("#thrV").textContent=S.thr+"%+"}});
 document.addEventListener("change",e=>{const el=e.target,k=el.dataset.ch;if(!k)return;
-if(k==="fpart"){F.part=+el.value;F.lim=24;fillGrid()}else if(k==="ftime"){F.time=+el.value;F.lim=24;fillGrid()}else if(k==="ffav"){F.fav=el.checked;fillGrid()}
+if(k==="fpart"){F.part=+el.value;F.lim=24;fillGrid()}else if(k==="fcu"){F.cu=el.value;F.lim=24;fillGrid()}else if(k==="ftime"){F.time=+el.value;F.lim=24;fillGrid()}else if(k==="ffav"){F.fav=el.checked;fillGrid()}
 else if(k==="gmode"){S.gmode=el.value;save();render(true)}else if(k==="hidep"){S.hidePantry=el.checked;save();render(true)}
 else if(k==="recPhoto"){const f=el.files&&el.files[0];if(!f)return;const id=el.dataset.id;shrinkImg(f,u=>{S.photos[id]=u;save();toast("📷 Photo saved");rerSheet()})}
 else if(k==="thr2"){save();render(true)}else if(k==="maxm"){S.maxMiss=+el.value;save();render(true)}
