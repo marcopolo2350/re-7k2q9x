@@ -492,7 +492,7 @@ else if(k==="pdq"){pd.q=el.value;const q=pd.q.trim().toLowerCase();$("#pdl").inn
 else if(k==="note"){S.notes[el.dataset.id]=el.value.slice(0,1200);if(!S.notes[el.dataset.id])delete S.notes[el.dataset.id];clearTimeout(inT);inT=setTimeout(save,400)}
 else if(k==="thr"){S.thr=+el.value;$("#thrV").textContent=S.thr+"%+"}});
 document.addEventListener("change",e=>{const el=e.target,k=el.dataset.ch;if(!k)return;
-if(k==="fpart"){F.part=+el.value;F.lim=24;fillGrid()}else if(k==="fcu"){F.cu=el.value;F.lim=24;fillGrid()}else if(k==="ftime"){F.time=+el.value;F.lim=24;fillGrid()}else if(k==="ffav"){F.fav=el.checked;fillGrid()}
+if(k==="fpart"){F.part=+el.value;F.lim=24;fillGrid()}else if(k==="fcu"){Object.assign(F,{cu:el.value,cat:"all",mn:"",part:0,time:0,fav:false,lim:24});render(true)}else if(k==="ftime"){F.time=+el.value;F.lim=24;fillGrid()}else if(k==="ffav"){F.fav=el.checked;fillGrid()}
 else if(k==="gmode"){S.gmode=el.value;save();render(true)}else if(k==="hidep"){S.hidePantry=el.checked;save();render(true)}
 else if(k==="recPhoto"){const f=el.files&&el.files[0];if(!f)return;const id=el.dataset.id;shrinkImg(f,u=>{S.photos[id]=u;save();toast("📷 Photo saved");rerSheet()})}
 else if(k==="thr2"){save();render(true)}else if(k==="maxm"){S.maxMiss=+el.value;save();render(true)}
