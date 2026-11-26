@@ -39,8 +39,21 @@ Importance and substitutability are separate properties.
 - `imgs-v1`: photos you have viewed (local images only).
 - `offline-v1`: photos saved with "Save offline" (local and TheMealDB). Never deleted by updates.
 
-## Regression baseline
-Open the app with `?selftest=1` (add `&images=1` to check every photo URL). It snapshots and restores your saved data and lists pass/fail for data integrity, rendering, filters and counts, pantry tiers, grocery groups, scaling, timers, timelines and the service worker.
+## Data format version 3 (Phase 3/4)
+`S.schema = 3`. `migrate()` is additive: it adds `hist {id:[entries]}`, `ver {vid: version}`, `cols [{id,name,ids}]`, `rej {id:{n,at}}`, `recent []`, `inv {item:{q,u,loc,bought,opened,exp,low,staple}}`, `buyCount {}`, `equip {oven,burners,...}`, `aisleOrder []`, `prefs {lastBackup}`, and gives leftovers `type/where/cooled`. Nothing is renamed or removed. Before the first upgrade a copy of the raw data is kept in `roses-eats-v1.pre-v3`.
+Personal photos live in IndexedDB database `roses-eats`, store `photos` (key `h:<recipeId>:<time>:<n>`, value a 720-px JPEG data URL). Recipe versions use ids from 700001 and are registered in `RID` only (not in the library list).
+
+## Backup file (format 2)
+`{app, format: 2, schema, exported, state: S, photos: {key: dataURL}}`.
+- **Included:** everything in `S` (favorites, history, versions, collections, ratings, notes, own recipes, pantry and inventory, leftovers, meal plans, grocery list and extras, equipment, settings and preferences) plus all personal photos from IndexedDB.
+- **Not included:** downloaded offline photo copies (re-downloadable), the app's own cached files, the passcode-entered flag, and recipe photos you set on built-in recipes stored in `S.photos` (these *are* included because they are in `S`).
+
+Restore validates the file first: bad JSON, truncation, a newer data format or wrong types are rejected with nothing changed. It then shows a preview of counts, saves the current data to `roses-eats-v1.before-import` (for "Undo last import"), adds photos, and finally swaps the data in one write. If that write fails (storage full), the current data stays as it was.
+
+## Tests
+- `?diag=1`: lightweight, read-only diagnostics. Safe on a real phone; it never writes.
+- `?testenv=1&selftest=full`: full cumulative regression. It runs only in an isolated namespace (localStorage `roses-eats-TEST`, IndexedDB `roses-eats-test`, cache `offline-test`), so household data is never read or written, even if interrupted. Coverage includes the restored Phase 1 filter set (2,886 base combinations plus equipment variants) and all 1,766 per-category × per-ingredient dropdown counts.
+- Add `&images=1` to either mode to check every photo URL.
 
 ## Photo provenance
 `photo-manifest.json`: one entry per recipe photo with recipe id, local file, SHA-256, source URL/page, creator, license, attribution requirement and verification status.
