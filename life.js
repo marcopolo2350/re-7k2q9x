@@ -28,7 +28,7 @@ function migrate(s) {
 migrate(S); save();
 const _load = load; load = function () { return migrate(_load()); };
 /* IndexedDB for personal photos (localStorage is too small for photos) */
-const IDB = { db: null, open() { return this.db ? Promise.resolve(this.db) : new Promise((ok, no) => { if (!("indexedDB" in window)) return no(new Error("no idb")); const r = indexedDB.open("roses-eats", 1); r.onupgradeneeded = () => r.result.createObjectStore("photos"); r.onsuccess = () => { this.db = r.result; ok(this.db); }; r.onerror = () => no(r.error); }); },
+const IDB = { db: null, open() { return this.db ? Promise.resolve(this.db) : new Promise((ok, no) => { if (!("indexedDB" in window)) return no(new Error("no idb")); const r = indexedDB.open(TESTENV ? "roses-eats-test" : "roses-eats", 1); r.onupgradeneeded = () => r.result.createObjectStore("photos"); r.onsuccess = () => { this.db = r.result; ok(this.db); }; r.onerror = () => no(r.error); }); },
   async tx(mode, fn) { const db = await this.open(); return new Promise((ok, no) => { const t = db.transaction("photos", mode); const st = t.objectStore("photos"); const out = fn(st); t.oncomplete = () => ok(out && out.result !== undefined ? out.result : out); t.onerror = () => no(t.error); }); },
   put(k, v) { return this.tx("readwrite", s => s.put(v, k)); }, get(k) { return this.tx("readonly", s => s.get(k)); }, del(k) { return this.tx("readwrite", s => s.delete(k)); },
   async all() { const db = await this.open(); return new Promise((ok, no) => { const out = {}; const t = db.transaction("photos", "readonly"); const c = t.objectStore("photos").openCursor(); c.onsuccess = () => { const x = c.result; if (x) { out[x.key] = x.value; x.continue(); } }; t.oncomplete = () => ok(out); t.onerror = () => no(t.error); }); } };
@@ -38,6 +38,8 @@ function validateBackup(o) {
   const errs = []; if (!o || typeof o !== "object") return { ok: false, errs: ["Not a Rose's EATS backup file."] };
   const st = o.state && typeof o.state === "object" ? o.state : (o.v ? o : null);
   if (!st) return { ok: false, errs: ["No saved data found in this file."] };
+  if (st.schema && st.schema > SCHEMA) return { ok: false, errs: ["This backup was made by a newer version of the app (data format " + st.schema + "). Update the app first."] };
+  if (o.format && o.format > 2) return { ok: false, errs: ["Unsupported backup format."] };
   const arr = ["fav", "cooked", "pantry", "mine", "extras", "left", "log"], obj = ["plan", "basket", "notes", "rating", "tk", "photos"];
   arr.forEach(k => { if (st[k] != null && !Array.isArray(st[k])) errs.push(k + " should be a list"); });
   obj.forEach(k => { if (st[k] != null && typeof st[k] !== "object") errs.push(k + " should be an object"); });
@@ -385,18 +387,12 @@ dDetail = function () {
 const _schedule = schedule;
 schedule = function (ids, serveAt) {
   const s = _schedule(ids, serveAt); const cap = Math.max(1, S.equip.burners || 4);
-  /* burner capacity: push stove tasks earlier (with their predecessors) when too many overlap */
-  for (let pass = 0; pass < 6; pass++) {
-    let moved = false; const st = s.tasks.filter(t => t.stove);
-    for (const t of st) { const over = st.filter(o => o !== t && o.start < t.end && t.start < o.end).length + 1; if (over > cap) { const sh = (t.end - Math.max(...st.filter(o => o !== t && o.start < t.end && t.start < o.end).map(o => o.start))) || 6e4; s.tasks.filter(x => x.rid === t.rid && x.start <= t.start).forEach(x => { x.start -= sh; x.end -= sh; }); moved = true; break; } }
-    if (!moved) break;
-  }
   s.tasks.sort((a, b) => a.start - b.start); s.start = s.tasks.length ? s.tasks[0].start : serveAt;
   s.noOven = !S.equip.oven && s.tasks.some(t => t.oven);
   return s;
 };
 const _validSchedule = validSchedule;
-validSchedule = function (s) { if (!_validSchedule(s)) return false; const cap = Math.max(1, S.equip.burners || 4); const st = s.tasks.filter(t => t.stove); for (const t of st) if (st.filter(o => o.start < t.end && t.start < o.end).length > cap) return false; return true; };
+validSchedule = function (s) { if (!_validSchedule(s)) return false; const cap = Math.max(1, S.equip.burners || 4); const st = s.tasks.filter(t => t.stove); for (const t of st) if (st.filter(o => o.start <= t.start && t.start < o.end).length > cap) return false; return true; };
 /* ================= navigation: six destinations ================= */
 TABS.splice(0, TABS.length, ["home", "🏠", "For You"], ["recipes", "📖", "Cookbook"], ["pantry", "🧺", "Kitchen"], ["plan", "🗓️", "Plan"], ["groceries", "🛒", "Shop"], ["cook", "👩‍🍳", "Cook"]);
 V.cook = function () {

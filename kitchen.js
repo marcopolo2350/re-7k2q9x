@@ -169,7 +169,7 @@ A.kChefSave = el => {
   m.chef = { ing, tips }; save(); syncMine(); toast("👩‍🍳 Chef notes saved"); openDetail(id);
 };
 /* ---------- offline downloads ---------- */
-const OFF = "offline-v1";
+const OFF = TESTENV ? "offline-test" : "offline-v1";
 if (!S.offline || typeof S.offline !== "object") S.offline = {};
 const offUrl = r => { const u = rImg(r); return u && !/^data:/.test(u) ? new URL(u, location.href).href : ""; };
 const sizeCache = {};
@@ -338,7 +338,7 @@ function tasksOf(r) {
 }
 const overlap = (a, b) => a[0] < b[1] && b[0] < a[1];
 function schedule(ids, serveAt) {
-  const rs = ids.map(R_).filter(Boolean); const all = [], busy = [], ovenUse = [], ahead = [];
+  const rs = ids.map(R_).filter(Boolean); const all = [], busy = [], ovenUse = [], ahead = [], stoveUse = []; const CAP = Math.max(1, (S.equip && S.equip.burners) || 4);
   const ORD = { main: 0, other: 1, side: 2, app: 3, salad: 4, sauce: 5, bread: 6, dessert: 7 };
   rs.sort((a, b) => ORD[courseOf(a)] - ORD[courseOf(b)] || b.t - a.t);
   for (const r of rs) {
@@ -350,14 +350,15 @@ function schedule(ids, serveAt) {
         const st = end - t.d * 6e4, actI = [st, st + t.act * 6e4];
         const actClash = busy.find(b => overlap(actI, b));
         const ovClash = t.oven ? ovenUse.find(o => overlap([st, end], o) && Math.abs(o[2] - t.oven) > 25) : null;
-        if (!actClash && !ovClash) break;
+        const stFull = t.stove && stoveUse.filter(o => overlap([st, end], o)).length >= CAP;
+        if (!actClash && !ovClash && !stFull) break;
         let ne = end - 6e4;
         if (actClash) ne = Math.min(ne, actClash[0] - t.act * 6e4 + t.d * 6e4);
         if (ovClash) ne = Math.min(ne, ovClash[0]);
         end = ne;
       }
       const st = end - t.d * 6e4;
-      t.start = st; t.end = end; busy.push([st, st + t.act * 6e4]); if (t.oven) ovenUse.push([st, end, t.oven]);
+      t.start = st; t.end = end; busy.push([st, st + t.act * 6e4]); if (t.oven) ovenUse.push([st, end, t.oven]); if (t.stove) stoveUse.push([st, end]);
       all.push(t); cur = st;
     }
   }
@@ -404,4 +405,4 @@ V.home = function () {
   return h;
 };
 render(true);
-if (/[?&]selftest=1/.test(location.search)) setTimeout(() => { const s = document.createElement("script"); s.src = "selftest.js?v=1"; document.body.appendChild(s); }, 1500);
+if (/[?&](selftest=full|diag=1)/.test(location.search)) setTimeout(() => { const s = document.createElement("script"); s.src = "selftest.js?v=3"; document.body.appendChild(s); }, 1500);

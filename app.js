@@ -69,7 +69,7 @@ const todayIso=()=>iso(new Date());
 const weekDates=w=>{const m=fromIso(w);return[0,1,2,3,4,5,6].map(k=>iso(addDays(m,k)))};
 const nice=s=>{const d=fromIso(s);return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})};
 /* ---------- state ---------- */
-const KEY="roses-eats-v1";
+const TESTENV=/[?&]testenv=1/.test(location.search);const KEY=TESTENV?"roses-eats-TEST":"roses-eats-v1";
 function fresh(){return{v:1,mine:[],left:[],log:[],soon:[],timers:[],fav:[],cooked:[],basket:{},pantry:["salt","black pepper","olive oil","vegetable oil"],plan:{},checked:{},extras:[],tk:{},rating:{},notes:{},hidden:[],photos:{},gone:{},myIng:[],thr:65,maxMiss:5,flex:2,skipOpt:false,gmode:"all",hidePantry:true,night:false,week:iso(curMon())}}
 function load(){let d=null;try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}const f=fresh();if(!d||typeof d!=="object")return f;const s=Object.assign(f,d);const cm=iso(curMon());s.week=(typeof s.week==="string"&&/^\d{4}-\d\d-\d\d$/.test(s.week)&&s.week>=cm)?s.week:cm;["hidden","myIng"].forEach(k=>{if(!Array.isArray(s[k]))s[k]=[]});["photos","gone"].forEach(k=>{if(!s[k]||typeof s[k]!=="object")s[k]={}});return s}
 let S=load();let saveWarned=false;
