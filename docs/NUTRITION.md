@@ -28,15 +28,19 @@ Not counted, and listed under the estimate:
 - **Partial estimate**: one or two ingredients are missing and at least 80% were counted. The missing ones are named; the real values are higher.
 - **Unavailable**: more missing than that, or no usable quantities.
 
-Library coverage at release: 1,061 estimated, 401 partial, 89 unavailable (of 1,551).
+Library coverage (v3.1): 837 estimated, 499 partial, 215 unavailable (of 1,551). The earlier figure (1,061 / 401 / 89) was too optimistic. Ingredients listed with no quantity (for example "chickpeas, can") were treated like "to taste" and left out without being flagged. They now count as missing.
 
 ## Assumptions and limits
 - Raw, as-listed weights. No adjustment for cooking losses, fat drained from browned meat, oil left in the pan after frying, or marinade discarded. Deep-fried and marinated dishes are therefore overstated for fat.
-- Bone-in cuts are weighed with the bone, while USDA values are for edible meat, so these are overstated.
+- Bone-in cuts: weights given in lb, oz or g are reduced to an approximate edible portion (thighs 75%, drumsticks 70%, wings 60%, ribs or short ribs 60%, shanks 55%, whole chicken 65%, oxtail 45%, trotters 30%, chops 80%; boneless, fillet or ground cuts are unchanged). These factors are approximations, not USDA refuse values.
 - Substitutions are not reflected unless you save a personal version with the substitute.
 - Sodium excludes salt "to taste".
 
 ## Checks (regression suite)
+- Beef and Noodles (10 ingredients, mixed units: lb, tbsp, count, clove, cup, oz, tsp) matches an independent hand calculation from USDA values: 524 kcal and 44 g protein per serving.
+- Honey Mustard Chicken: bone-in thighs are counted at 680 g edible of 907 g; 517 kcal per serving matches the hand calculation.
+- Doubling every quantity and the serving count leaves per-serving values unchanged.
+- An ingredient with no quantity is counted as missing.
 - 100 g butter equals the USDA value.
 - 1 cup uses the food's own cup weight.
 - Unmatched ingredients make the result Partial or Unavailable, never zero.
