@@ -37,7 +37,7 @@
     const ckN = FULL ? B.length : 150; let cb = 0; for (const r of B.slice(0, ckN)) { try { ck = { id: r.id, i: -1, s: r.s, ing: true, got: {}, done: {} }; for (let i = -1; i < r.st.length; i++) { ck.i = i; rCook(); if (/undefined|NaN/.test($("#cook").innerText)) cb++; } } catch (e) { cb++; } } ck = null; $("#cook").innerHTML = "";
     ok("render", `cooking mode, every step (${ckN} recipes)`, cb === 0, cb + " bad");
     let tb = 0, tw = []; for (const t of TABS) { try { tab = t[0]; render(); if (document.documentElement.scrollWidth > innerWidth + 1) { tb++; tw.push(t[0] + ":" + document.documentElement.scrollWidth + "/" + innerWidth); } } catch (e) { tb++; tw.push(t[0] + ":" + e.message); } } tab = "home"; render();
-    ok("render", "all six tabs render without horizontal overflow", tb === 0, tw.join(" "));
+    if (innerWidth < 200) out.push({ sys: "render", name: "all six tabs render without horizontal overflow", pass: null, info: "skipped: page hidden, width not measurable" }); else ok("render", "all six tabs render without horizontal overflow", tb === 0, tw.join(" "));
     if (!FULL) { const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); ok("offline", "service worker active", reg && reg.active); throw "diag-done"; }
     /* ---------- filters and counts (restored full Phase 1 coverage) ---------- */
     tab = "recipes"; render();
@@ -123,7 +123,22 @@
     ok("nutrition", "unmatched ingredients are never counted as zero", nutOf(unk).status !== "estimated" && nutOf(unk).miss.length === 1);
     const op = { id: -4, s: 1, ilv: ["E", "O"], i: [{ q: 100, u: "g", item: "butter", note: "" }, { q: 100, u: "g", item: "butter", note: "" }] };
     ok("nutrition", "optional ingredients are excluded and listed", Math.abs(nutOf(op).per[0] - bf[0]) < .01 && nutOf(op).opt.length === 1);
+    const bnN = nutOf(R_(3583)); ok("nutrition", "Beef and Noodles matches an independent hand calculation (524 kcal, 44 g protein per serving)", Math.abs(bnN.per[0] - 524.4) < 2 && Math.abs(bnN.per[1] - 44) < 1, Math.round(bnN.per[0]) + " kcal");
+    const hmN = nutOf(R_(3241)); ok("nutrition", "bone-in thighs use edible portion (Honey Mustard Chicken 517 kcal)", Math.abs(hmN.per[0] - 517.5) < 2 && hmN.used[0][1] === 680, hmN.used[0][1] + " g edible of 907 g");
+    const dbl = { ...R_(3583), id: -5, s: 12, i: R_(3583).i.map(g => ({ ...g, q: g.q == null ? null : g.q * 2 })) }; ok("nutrition", "per-serving values don't change when a recipe is doubled", Math.abs(nutOf(dbl).per[0] - bnN.per[0]) < .5);
+    const nq = { id: -6, s: 1, ilv: ["E", "E"], i: [{ q: 100, u: "g", item: "butter", note: "" }, { q: null, u: "", item: "chickpeas", note: "can" }] }; ok("nutrition", "an ingredient with no quantity is missing, not zero or 'to taste'", nutOf(nq).miss.length === 1 && nutOf(nq).status !== "estimated");
     const nc = { estimated: 0, partial: 0, unavailable: 0 }; B.forEach(r => nc[nutOf(r).status]++); ok("nutrition", "recipe-level coverage", true, JSON.stringify(nc));
+    /* ---------- closure items ---------- */
+    det = { id: 52927, s: 4, tk: false }; const mh = dDetail(); openCook(52927); ok("safety", "unverified curing/ferment recipes can't start cooking mode", !$("#cook").classList.contains("open") && !/data-a="cook" data-id="52927"/.test(mh) && /Show the unverified steps/.test(mh)); closeSheet();
+    ok("safety", "unverified high-risk recipes are never recommended", !recommend({ seed: 5 }, 400).all.some(x => riskRestricted(x.r)));
+    RQ = null; const dg = recommend({ seed: 2, diet: "dairyfree" }, 3).top; ok("recommend", "diet results say they are ingredient-based estimates", dg.length && dg.every(x => /not verified/.test(x.why[0])));
+    const mk = (id, n, st) => { RID[id] = { id, n, s: 4, c: "comfort", i: [{ q: 1, u: "lb", item: "chicken breast", note: "" }, { q: 1, u: "cup", item: "rice", note: "" }], st, ilv: ["E", "E"], keys: ["chicken breast", "rice"], cf: null }; };
+    mk(-11, "Test A", ["Roast the chicken breast at 425°F for 20 minutes.", "Serve with rice."]); mk(-12, "Test B", ["Roast the chicken breast at 425°F until 165°F.", "Slice over rice."]); mk(-13, "Test C", ["Marinate the chicken breast in yogurt, then roast at 425°F.", "Serve."]);
+    const d0p = todayIso(), d1p = iso(addDays(fromIso(d0p), 1)); S.week = iso(mondayOf(fromIso(d0p))); S.plan = { [d0p]: [{ uid: "q1", id: -11, s: 4, m: "D" }, { uid: "q3", id: -13, s: 4, m: "D" }], [d1p]: [{ uid: "q2", id: -12, s: 4, m: "D" }] };
+    const pp = proteinPrep(Object.entries(S.plan).flatMap(([d, E]) => E.map(e => ({ ...e, date: d }))));
+    ok("kitchen", "shared protein cooked once only when the method matches", pp.length === 1 && pp[0].uses.length === 2 && !pp[0].uses.some(u => u.n === "Test C") && pp[0].q === 2, JSON.stringify(pp.map(o => [o.item, o.mth, o.q, o.uses.map(u => u.n)])));
+    [-11, -12, -13].forEach(id => delete RID[id]); S.plan = {};
+    localStorage.setItem(KEY + ".restore-pending", JSON.stringify({ id: "x-unfinished", at: Date.now() })); ok("backup", "a restore killed before the final write is detected and old data kept", checkInterruptedRestore() === "interrupted"); S.importId = "x-done"; localStorage.setItem(KEY + ".restore-pending", JSON.stringify({ id: "x-done", at: Date.now() })); ok("backup", "a restore killed after the final write completes cleanly", checkInterruptedRestore() === "completed" && !localStorage.getItem(KEY + ".restore-pending"));
     /* ---------- backup, restore, migration ---------- */
     S.fav = [5, 3583]; S.notes = { 5: "extra garlic" }; S.pantry = ["salt", "onion"]; save();
     try { await IDB.put("h:3583:test", "data:image/jpeg;base64,/9j/AAA="); } catch (e) {}
@@ -151,10 +166,10 @@
   } catch (e) { if (e !== "diag-done") ok("suite", "test suite crashed", false, (e && e.message) || e); }
   if (/images=1/.test(location.search)) { let badI = [], i = 0; const L = B.map(r => r.img); const head = async u => { try { const x = await fetch(u, { method: "HEAD", cache: "no-store", mode: "cors" }); return x.ok; } catch (e) { return false; } }; await Promise.all(Array.from({ length: 12 }, async () => { while (i < L.length) { const u = L[i++]; if (!(await head(u))) badI.push(u); } })); ok("images", "every photo URL responds", !badI.length, badI.slice(0, 5).join(" ")); }
   if (!FULL) save = realSave;
-  const pass = out.filter(x => x.pass).length;
-  window.__selftest = { mode: FULL ? "full" : "diagnostics", pass, fail: out.length - pass, ms: Math.round(performance.now() - t0), results: out };
+  const pass = out.filter(x => x.pass === true).length, skip = out.filter(x => x.pass === null).length;
+  window.__selftest = { mode: FULL ? "full" : "diagnostics", pass, skip, fail: out.length - pass - skip, ms: Math.round(performance.now() - t0), results: out };
   const d = document.createElement("div"); d.id = "selftest";
-  d.innerHTML = `<h2>${FULL ? "Full regression (isolated test data)" : "Diagnostics (read-only)"}: ${pass}/${out.length} passed</h2>${out.map(x => `<div style="color:${x.pass ? "#2F5A33" : "#A33A1F"}">${x.pass ? "✓" : "✗"} <b>${esc(x.sys)}</b> ${esc(x.name)} <small>${esc(x.info)}</small></div>`).join("")}<p><button onclick="location.href=location.pathname">Close</button></p>`;
+  d.innerHTML = `<h2>${FULL ? "Full regression (isolated test data)" : "Diagnostics (read-only)"}: ${pass}/${out.length} passed</h2>${out.map(x => `<div style="color:${x.pass ? "#2F5A33" : "#A33A1F"}">${x.pass === null ? "–" : x.pass ? "✓" : "✗"} <b>${esc(x.sys)}</b> ${esc(x.name)} <small>${esc(x.info)}</small></div>`).join("")}<p><button onclick="location.href=location.pathname">Close</button></p>`;
   d.style.cssText = "position:fixed;inset:0;z-index:999;overflow:auto;background:#fff;color:#222;padding:16px;font:14px -apple-system,sans-serif";
   document.body.appendChild(d);
 })();

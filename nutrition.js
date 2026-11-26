@@ -21,7 +21,7 @@ function nutOf(r) {
   r.i.forEach((g, k) => {
     const L = (r.ilv && r.ilv[k]) || "U";
     if (SKIP.has(g.item)) return;
-    if (g.q == null) { taste.push(g.item); return; }
+    if (g.q == null) { if (/taste|pinch|sprinkl|garnish|serving|as needed|splash|drizzle|dash|dust|optional|for frying|to fry|greasing/i.test((g.note || "") + " " + g.u) || /^(salt|black pepper|pepper|water|ice)$/.test(g.item)) taste.push(g.item); else miss.push(g.item + " (no quantity)"); return; }
     if (L === "O") { opt.push(g.item); return; }
     const m = nutFood(g.item); if (!m) { miss.push(g.item); return; }
     const gr = nutGrams(g, m); if (gr == null || !(gr >= 0)) { miss.push(g.item + " (unit " + (g.u || "count") + ")"); return; }

@@ -405,4 +405,4 @@ V.home = function () {
   return h;
 };
 render(true);
-if (/[?&](selftest=full|diag=1)/.test(location.search)) setTimeout(() => { const s = document.createElement("script"); s.src = "selftest.js?v=3"; document.body.appendChild(s); }, 1500);
+if (/[?&](selftest=full|diag=1)/.test(location.search)) setTimeout(() => { const s = document.createElement("script"); s.src = "selftest.js?v=5"; document.body.appendChild(s); }, 1500);
