@@ -133,9 +133,14 @@ class HouseShare {
       const json = JSON.stringify(inner), z = RC.canZip ? 1 : 0, data = z ? await RC.zip(json) : RC.te.encode(json), id = RC.id(12);
       const box = await RC.seal(hk, data, "RE-SHARE1|" + m.hh.id + "|" + id + "|" + z);
       const file = { app: "Rose's EATS", format: "RE-SHARE1", note: "Encrypted household file. Open it in Rose's EATS: Settings, Household sharing, Open a household file.", hh: m.hh.id, id, z, n: box.n, ct: box.ct };
-      await this.setMeta({ seq, sent: o.kind === "backup" ? m.sent : sent, lastExport: { at: this.now(), kind: o.kind || "changes" } });
-      return { text: JSON.stringify(file), id, counts: cnt, photos: Object.keys(att).length, bytes: 0 };
+      /* nothing is marked as sent yet: only confirmSent(), called after the share sheet or download succeeded, does that,
+         so a cancelled or failed share never causes a photo to be skipped next time */
+      const mark = {}; if (o.kind !== "backup") for (const [k, v] of Object.entries(sent)) if ((m.sent || {})[k] !== v) mark[k] = v;
+      return { text: JSON.stringify(file), id, counts: cnt, photos: Object.keys(att).length, pend: { seq, mark, kind: o.kind || "changes" } };
     });
+  }
+  confirmSent(f) {
+    return this.lock(async () => { const m = await this.meta(), p = f && f.pend; if (!p) return; await this.setMeta({ seq: Math.max(m.seq || 0, p.seq), sent: { ...(m.sent || {}), ...p.mark }, lastExport: { at: this.now(), kind: p.kind } }); });
   }
   /* ---------- import: decrypt, validate, preview (nothing is written) ---------- */
   readFile(text, opt) {
