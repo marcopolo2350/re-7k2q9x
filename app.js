@@ -71,7 +71,7 @@ const weekDates=w=>{const m=fromIso(w);return[0,1,2,3,4,5,6].map(k=>iso(addDays(
 const nice=s=>{const d=fromIso(s);return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})};
 /* ---------- state ---------- */
 const TESTENV=/[?&]testenv=1/.test(location.search);const KEY=TESTENV?"roses-eats-TEST":"roses-eats-v1";
-function fresh(){return{v:1,mine:[],left:[],log:[],soon:[],timers:[],fav:[],cooked:[],basket:{},pantry:["salt","black pepper","olive oil","vegetable oil"],plan:{},checked:{},extras:[],tk:{},rating:{},notes:{},hidden:[],photos:{},gone:{},myIng:[],thr:65,maxMiss:5,flex:2,skipOpt:false,gmode:"all",hidePantry:true,night:false,week:iso(curMon())}}
+function fresh(){return{v:1,mine:[],left:[],log:[],soon:[],timers:[],fav:[],cooked:[],basket:{},pantry:["salt","black pepper","olive oil","vegetable oil"],plan:{},checked:{},extras:[],tk:{},rating:{},notes:{},hidden:[],photos:{},gone:{},myIng:[],thr:65,maxMiss:5,flex:2,skipOpt:false,gmode:"all",hidePantry:true,night:false,week:iso(curMon()),bm:[],recent:[]}}
 function load(){let d=null;try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}const f=fresh();if(!d||typeof d!=="object")return f;const s=Object.assign(f,d);const cm=iso(curMon());s.week=(typeof s.week==="string"&&/^\d{4}-\d\d-\d\d$/.test(s.week)&&s.week>=cm)?s.week:cm;["hidden","myIng"].forEach(k=>{if(!Array.isArray(s[k]))s[k]=[]});["photos","gone"].forEach(k=>{if(!s[k]||typeof s[k]!=="object")s[k]={}});return s}
 let S=load();let saveWarned=false;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){if(!saveWarned){saveWarned=true;toast("Heads up: this browser isn't saving changes")}}}
@@ -186,12 +186,21 @@ function fillGrid(){const L=filtered();const q=F.q.trim();$("#tkHint").innerHTML
 let det=null,sheetKind=null;
 function sheet(html,kind){sheetKind=kind;$("#sheetIn").innerHTML=html;$("#shw").classList.add("open");document.body.style.overflow="hidden"}
 function closeSheet(){$("#shw").classList.remove("open");$("#shw").style.zIndex="";sheetKind=null;if(ck){return}document.body.style.overflow=$("#book").classList.contains("open")?"hidden":"";if(!$("#book").classList.contains("open"))render(true);else refreshBook()}
-function openDetail(id){const r=R_(id);det={id,s:r.s,tk:false};sheet(dDetail(),"detail");$("#sheet").scrollTop=0}
+function openDetail(id){const r=R_(id);det={id,s:r.s,tk:false};noteRecent(id);sheet(dDetail(),"detail");$("#sheet").scrollTop=0}
+/* Reader navigation: the reading order is the cookbook order (chapters -> sections -> recipes), built once from ORG.book(). */
+let FLAT=null;
+function flatBook(){if(FLAT)return FLAT;FLAT=[];ORG.book().chapters.forEach((c,ci)=>c.secs.forEach(s=>s.ids.forEach(id=>FLAT.push({id,ci}))));return FLAT}
+function navOf(id){const F=flatBook();const k=F.findIndex(x=>x.id===id);if(k<0)return null;const ci=F[k].ci;const first=F.findIndex(x=>x.ci===ci);let last=first;while(last+1<F.length&&F[last+1].ci===ci)last++;const chFirst=c=>F.find(x=>x.ci===c).id;const B=ORG.book().chapters;
+return{pos:k+1,n:F.length,prev:k>0?F[k-1].id:null,next:k<F.length-1?F[k+1].id:null,pch:first>0?chFirst(F[first-1].ci):null,nch:last<F.length-1?chFirst(F[last+1].ci):null,chName:B[ci].n,chPos:B[ci].no,chN:B.length,chNo:k-first+1,chCount:last-first+1}}
+function noteRecent(id){if(!Array.isArray(S.recent))S.recent=[];S.recent=[id,...S.recent.filter(x=>x!==id)].slice(0,12);save()}
+function isBm(id){return Array.isArray(S.bm)&&S.bm.includes(id)}
+function navBar(id){const g=navOf(id);if(!g)return"";const b=(a,t,v,lab)=>`<button class="btn ghost" data-a="${a}" data-id="${v}"${v?"":" disabled"} aria-label="${lab}">${t}</button>`;
+return`<nav class="rnav" aria-label="Reading navigation"><div class="rnav-pos">${esc(g.chName)} · recipe ${g.chNo} of ${g.chCount} · book ${g.pos} of ${g.n}</div><div class="rnav-row">${b("rchprev","‹ Chapter",g.pch,"Previous chapter")}${b("rprev","‹ Recipe",g.prev,"Previous recipe")}${b("rnext","Recipe ›",g.next,"Next recipe")}${b("rchnext","Chapter ›",g.nch,"Next chapter")}</div><button class="btn ${isBm(id)?"sage":"ghost"} full" data-a="bm" data-id="${id}" aria-pressed="${isBm(id)}">${isBm(id)?"🔖 Bookmarked":"🔖 Bookmark this recipe"}</button></nav>`}
 function rerSheet(){if(!sheetKind)return;const sc=$("#sheet").scrollTop;if(sheetKind==="detail")$("#sheetIn").innerHTML=dDetail();else if(sheetKind==="plan")$("#sheetIn").innerHTML=dPlan();$("#sheet").scrollTop=sc}
 function dDetail(){const r=R_(det.id),c=CATS[r.c],f=det.s/r.s,st=stats(r),rt=S.rating[r.id]||0;const custom=!!S.tk[r.id];
 return`<div class="d-art">${art(r)}</div>${!S.photos[r.id]&&typeof PHOTO_SRC!=="undefined"&&PHOTO_SRC[r.id]?`<div class="pcred">Photo: ${esc(PHOTO_SRC[r.id])}</div>`:""}<div class="d-body">
 <div class="d-cat">${r.mine?"⭐ Our own recipe":r.p===7?"🌍 "+(r.cu?esc(r.cu)+" · ":"")+"Around the world":PARTS[r.p].split(" · ")[0]} · ${c.e} ${c.n}${r.hot?" · 🔥 TikTok famous":""}</div>
-<h2 class="d-t">${esc(r.n)}</h2><p class="d-desc">${esc(r.d)}</p>
+${navBar(r.id)}<h2 class="d-t">${esc(r.n)}</h2><p class="d-desc">${esc(r.d)}</p>
 <div class="d-meta"><span>⏱ ${r.t>=120?Math.round(r.t/60)+" hours":r.t+" min"}</span><span>🔥 ${r.cz}/10 cozy</span><span>📶 ${r.df}</span><span>💛 ${esc(r.gf)}</span><span>${TIER[st.tier][0]} ${TIER[st.tier][1]}</span>${isCooked(r.id)?"<span>✅ Cooked</span>":""}</div>
 <button class="btn full big rose" style="margin-bottom:8px" data-a="cook" data-id="${r.id}">👩‍🍳 Start cooking (step by step)</button>${(()=>{const cs=cookStats(r.id);return cs?`<div class="mut small" style="margin:-2px 0 8px">Made ${cs.n} time${cs.n>1?"s":""} · last on ${nice(cs.last)}</div>`:""})()}<div class="d-acts"><button class="btn ${isFav(r.id)?"rose":"ghost"}" data-a="fav" data-id="${r.id}">${isFav(r.id)?"♥ Favorite":"♡ Favorite"}</button><button class="btn ${isCooked(r.id)?"sage":"ghost"}" data-a="cooked" data-id="${r.id}">${isCooked(r.id)?"✓ Cooked":"Mark cooked"}</button><button class="btn ${inBasket(r.id)?"sage":"ghost"}" data-a="basket" data-id="${r.id}">${inBasket(r.id)?"✓ In list":"🛒 Select"}</button><button class="btn" style="grid-column:span 2" data-a="planDlg" data-id="${r.id}">＋ Add to planner</button><button class="btn ghost" data-a="bookAt" data-id="${r.id}">📚 Book</button></div>
 <button class="tt" data-a="tiktok" data-id="${r.id}">▶ ${S.tk[r.id]?"Watch it on TikTok":"Search it on TikTok"} <small>opens the TikTok app</small></button>
@@ -355,6 +364,11 @@ tkEdit:()=>{det.tk=!det.tk;rerSheet()},
 tkSave:el=>{const v=$("#tkin").value.trim();if(!validTk(v)){toast("Use a https://tiktok.com link");return}S.tk[el.dataset.id]=v;save();det.tk=false;toast("TikTok link saved ✓");rerSheet()},
 tkReset:el=>{delete S.tk[el.dataset.id];save();det.tk=false;rerSheet()},
 bookAt:el=>{const id=+el.dataset.id;closeSheet();lastWH=innerWidth+"x"+innerHeight;openBook(0,id)},
+rprev:el=>{const g=navOf(det.id);if(g&&g.prev)openDetail(g.prev)},
+rnext:el=>{const g=navOf(det.id);if(g&&g.next)openDetail(g.next)},
+rchprev:el=>{const g=navOf(det.id);if(g&&g.pch)openDetail(g.pch)},
+rchnext:el=>{const g=navOf(det.id);if(g&&g.nch)openDetail(g.nch)},
+bm:el=>{const id=+el.dataset.id;if(!Array.isArray(S.bm))S.bm=[];S.bm=isBm(id)?S.bm.filter(x=>x!==id):[id,...S.bm];save();toast(isBm(id)?"Bookmarked 🔖":"Bookmark removed");rerSheet()},
 planDlg:el=>planDlg(el.dataset.id?+el.dataset.id:0,el.dataset.date),
 pdPick:el=>{pd.id=+el.dataset.id;const r=R_(pd.id);pd.s=r.s;pd.m=r.c==="breakfast"?"B":r.c==="treats"?"S":r.c==="lunch"?"L":"D";rerSheet()},
 pdChange:()=>{pd.id=0;rerSheet()},
@@ -559,3 +573,6 @@ function addIng(name){name=String(name||"").trim().toLowerCase().replace(/\s+/g,
 if(!ALLITEMS.includes(name)&&!S.myIng.includes(name))S.myIng.push(name);if(!S.pantry.includes(name))S.pantry.push(name);save();syncMine();kQ="";
 const hits=RECIPES.filter(r=>r.keys.some(k=>ingMatch(name,k)));const near=hits.map(stats).sort((a,b)=>a.miss.length-b.miss.length).slice(0,8);const aisle=(AISLES.find(a=>a[0]===secOf(name))||AISLES[AISLES.length-1])[1];
 sheet(`<div class="d-body" style="padding-top:22px"><h2 class="d-t">✓ ${esc(cap(name))} is in the pantry</h2><p class="mut small">Filed under ${aisle}. ${hits.length?`It's used in <b>${hits.length}</b> recipe${hits.length>1?"s":""}. Here are the closest to ready:`:"No recipes use it yet. It's still saved, and recipes you add with it will match."}</p>${near.map(m=>`<button class="prow" data-a="open" data-id="${m.r.id}">${mini(m.r)}<span class="pn">${esc(m.r.n)}<small>${m.miss.length?"missing "+m.miss.length+": "+m.miss.slice(0,3).map(esc).join(", ")+(m.miss.length>3?"…":""):"🎉 ready to make"}</small></span></button>`).join("")}<button class="btn full" style="margin-top:10px" data-a="closeSheet">Done</button></div>`,"ing")}
+
+/* Reader navigation tests load only with ?selftest=reader (selftest-reader.js). */
+if (/[?&]selftest=reader/.test(location.search)) setTimeout(() => { const b = document.createElement("script"); b.src = "selftest-reader.js?v=" + Date.now(); document.body.appendChild(b); }, 1500);
