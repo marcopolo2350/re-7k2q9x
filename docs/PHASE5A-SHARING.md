@@ -105,8 +105,10 @@ All cryptography uses the browser's built-in Web Crypto. No third-party cryptogr
   - Files made with the old code are refused on phones that only know the new code.
   - An old backup can still be opened by typing the old words.
   - The phone that changed the code can open its own older files and shows a warning.
-- **Pairing:** done in person by typing 12 words, which have a checksum.
+- **Pairing:** done in person by typing 12 words.
   - There is no network step, so there is nothing to intercept or substitute.
+  - The BIP-39 checksum for 12 words is only 4 bits, so a wrong or swapped word is caught about 15 times in 16.
+  - For the rest, both phones show a **4-digit household check number** (from the household id) that should match. A mistyped code that slips past the checksum gives a different household, so its files are refused. This is tested.
   - The code isn't sent with files, and the app tells you not to post it or send it with your files.
 
 ## 6. Local consistency (the app's storage and the sharing records)
@@ -152,7 +154,8 @@ Tested scenarios:
 ## 8. Security validation (done here; this is not a professional audit)
 Verified by tests:
 - Household code entropy and format (128-bit random; the official BIP-39 vectors pass).
-- Mistyped or reordered words are caught by the checksum.
+- Missing or unknown words are always caught; wrong words usually fail the 4-bit checksum.
+- A word swap that passes the checksum is exposed by the check number and by files being refused.
 - Tampered ciphertext and tampered headers are rejected.
 - Files from another household are refused.
 - Files from a newer app version are refused.

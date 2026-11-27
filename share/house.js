@@ -22,7 +22,10 @@ class HouseShare {
   }
   async meta() { return this.st.tx(["meta"], "readonly", async s => { const m = {}; for (const k of await s.meta.keys()) m[k] = await s.meta.get(k); return m; }); }
   async setMeta(o) { return this.st.tx(["meta"], "readwrite", async s => { for (const [k, v] of Object.entries(o)) await (v === undefined ? s.meta.del(k) : s.meta.put(v, k)); }); }
-  async household() { const m = await this.meta(); return m.hh ? { id: m.hh.id, member: m.member, since: m.hh.since, peers: m.peers || {}, lastExport: m.lastExport || null, lastImport: m.lastImport || null } : null; }
+  async household() { const m = await this.meta(); return m.hh ? { id: m.hh.id, check: HouseShare.check(m.hh.id), member: m.member, since: m.hh.since, peers: m.peers || {}, lastExport: m.lastExport || null, lastImport: m.lastImport || null } : null; }
+  /* 4-digit household check number: both phones show the same one when they typed the same code (the 12-word
+     checksum is only 4 bits, so a swapped or wrong word is caught 15 times in 16; this catches the rest) */
+  static check(hh) { return String(parseInt(String(hh).slice(0, 8), 16) % 10000).padStart(4, "0"); }
   static async keysFor(code) { return { hh: RC.hex(await RC.hkdf(code, "RE share 1", "household id", 64)), hk: await RC.aesKey(await RC.hkdf(code, "RE share 1", "file key")) }; }
   async _setCode(code, member, keepOld) {
     const k = await HouseShare.keysFor(code), m = await this.meta(), old = (await this.st.get("keys", "old")) || [];
