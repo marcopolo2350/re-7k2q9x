@@ -255,12 +255,14 @@
       await h.marco.st.tx(["rec", "out"], "readwrite", async s => { await s.rec.clear(); await s.out.clear(); }); await h.marco.setMeta({ cursor: 0 });
       await h.marco.rebuild(); await sync(h.marco, h.rose); return [same(h.rose, h.marco) && !S_(h.rose).extras.some(x => x.uid === "x2") && S_(h.rose).pantry.includes("unsent-edit"), "rebuilt"];
     });
+    await T("s4-client", "Content Security Policy: no inline or third-party scripts, no plug-ins, no base override", () => { const m = document.querySelector('meta[http-equiv="Content-Security-Policy"]'); const c = m ? m.content : ""; const sc = (c.match(/script-src([^;]*)/) || [])[1] || ""; return [!!m && !/unsafe-inline|unsafe-eval|https?:/.test(sc) && /object-src 'none'/.test(c) && /base-uri 'none'/.test(c), sc.trim().split(" ").length + " script sources"]; });
+    await T("s4-client", "every loaded script is a same-origin file (no CDNs)", () => { const ext = [...document.scripts].filter(x => x.src && new URL(x.src).origin !== location.origin); return [!ext.length, document.scripts.length + " scripts"]; });
     await T("s4-recovery", "interrupted backup restore (existing safeguard) still works with sync code loaded", () => typeof checkInterruptedRestore === "function" && localStorage.getItem(KEY + ".restore-pending") === null);
   } catch (e) { ok("suite", "sync test suite crashed", false, (e && e.message) || e); }
   for (const e of engines) { try { await e.st.destroy(); } catch (x) {} }
   const pass = out.filter(x => x.pass === true).length, skip = out.filter(x => x.pass === null).length;
   window.__synctest = { pass, skip, fail: out.length - pass - skip, ms: Math.round(performance.now() - t0), results: out };
   const d = document.createElement("div"); d.id = "synctest";
-  d.innerHTML = `<h2>Sync tests (simulated phones and relay, test data only): ${pass}/${out.length} passed</h2>${out.map(x => `<div style="color:${x.pass ? "#2F5A33" : "#A33A1F"}">${x.pass === null ? "–" : x.pass ? "✓" : "✗"} <b>${esc(x.sys)}</b> ${esc(x.name)} <small>${esc(x.info)}</small></div>`).join("")}<p><button onclick="location.href=location.pathname">Close</button></p>`;
+  d.innerHTML = `<h2>Sync tests (simulated phones and relay, test data only): ${pass}/${out.length} passed</h2>${out.map(x => `<div style="color:${x.pass ? "#2F5A33" : "#A33A1F"}">${x.pass === null ? "–" : x.pass ? "✓" : "✗"} <b>${esc(x.sys)}</b> ${esc(x.name)} <small>${esc(x.info)}</small></div>`).join("")}<p><a href="./">Close</a></p>`;
   d.style.cssText = "position:fixed;inset:0;z-index:999;overflow:auto;background:#fff;color:#222;padding:16px;font:14px -apple-system,sans-serif"; document.body.appendChild(d);
 })();

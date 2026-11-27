@@ -169,7 +169,7 @@
   const pass = out.filter(x => x.pass === true).length, skip = out.filter(x => x.pass === null).length;
   window.__selftest = { mode: FULL ? "full" : "diagnostics", pass, skip, fail: out.length - pass - skip, ms: Math.round(performance.now() - t0), results: out };
   const d = document.createElement("div"); d.id = "selftest";
-  d.innerHTML = `<h2>${FULL ? "Full regression (isolated test data)" : "Diagnostics (read-only)"}: ${pass}/${out.length} passed</h2>${out.map(x => `<div style="color:${x.pass ? "#2F5A33" : "#A33A1F"}">${x.pass === null ? "–" : x.pass ? "✓" : "✗"} <b>${esc(x.sys)}</b> ${esc(x.name)} <small>${esc(x.info)}</small></div>`).join("")}<p><button onclick="location.href=location.pathname">Close</button></p>`;
+  d.innerHTML = `<h2>${FULL ? "Full regression (isolated test data)" : "Diagnostics (read-only)"}: ${pass}/${out.length} passed</h2>${out.map(x => `<div style="color:${x.pass ? "#2F5A33" : "#A33A1F"}">${x.pass === null ? "–" : x.pass ? "✓" : "✗"} <b>${esc(x.sys)}</b> ${esc(x.name)} <small>${esc(x.info)}</small></div>`).join("")}<p><a href="./">Close</a></p>`;
   d.style.cssText = "position:fixed;inset:0;z-index:999;overflow:auto;background:#fff;color:#222;padding:16px;font:14px -apple-system,sans-serif";
   document.body.appendChild(d);
 })();
