@@ -21,6 +21,7 @@ function migrate(s) {
   if (!s.equip || typeof s.equip !== "object") s.equip = { ...DEF_EQUIP };
   for (const k in DEF_EQUIP) if (s.equip[k] == null) s.equip[k] = DEF_EQUIP[k];
   if (!Array.isArray(s.aisleOrder)) s.aisleOrder = [];
+  if (!s.offline || typeof s.offline !== "object") s.offline = {}; /* was only set when the page loaded, so a restored backup without it broke Settings */
   if (!s.prefs || typeof s.prefs !== "object") s.prefs = {};
   (s.left || []).forEach(x => { if (!x.type) x.type = "dish"; });
   s.schema = SCHEMA; return s;
