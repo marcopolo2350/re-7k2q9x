@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-iGI2wcO3W2vhrJnIRDlYiyOR40zptdGUqEoSxuWIxg8=' 'sha256-EOyQqVSz/0L2/pTaFaIAqZ8AN71dspxSKj3eT4ENAOc=' 'sha256-4Vs7VeolkWaLM3pyjkAK+VDdZ2qJkg+i+gQq8UVvwD4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' data: https://www.tiktok.com; font-src 'self' data:; media-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -507,7 +508,7 @@ document.addEventListener("keydown",function(e){if(document.getElementById("gate
 </script>
 <script src="app.js?v=19"></script>
 <script src="kitchen.js?v=10"></script>
-<script src="life.js?v=5"></script>
+<script src="life.js?v=6"></script>
 <script src="nutdb.js?v=3"></script>
 <script src="nutrition.js?v=4"></script>
 <script src="life2.js?v=2"></script>
@@ -518,7 +519,8 @@ document.addEventListener("keydown",function(e){if(document.getElementById("gate
 <script src="share/store.js?v=1"></script>
 <script src="share/pantry-tx.js?v=1"></script>
 <script src="share/house.js?v=2"></script>
-<script src="share/hook.js?v=1"></script>
+<script src="share/hook.js?v=3"></script>
+<script src="share/ui.js?v=2"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){try{navigator.serviceWorker.register("sw.js").then(function(r){try{r.update()}catch(e){}}).catch(function(){})}catch(e){}})}</script>
 </body>
 </html>

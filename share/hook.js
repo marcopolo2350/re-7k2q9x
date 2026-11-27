@@ -18,7 +18,7 @@ const SHARE = (() => {
   async function capture() { try { await (await engine()).capture(); SHARE.lastError = null; } catch (e) { SHARE.lastError = e.code || e.name || "error"; } }
   async function start(member) { setCfg({ on: true, member }); const e = await engine(); const r = await e.setup(member); return r; }
   async function join(words, member) { const e = await engine(); await e.join(words, member); setCfg({ on: true, member }); return e; }
-  async function leave() { const e = await engine(); await e.leave(); eng = null; localStorage.removeItem(CFG); }
+  async function leave() { const e = await engine(); await e.leave(); eng = null; localStorage.removeItem(CFG); if (S.hh) { delete S.hh; save(); } }
   /* restoring a full app backup: mark it first, so an interrupted restore is reconciled on the next start */
   const _imp = A.lImpYes;
   A.lImpYes = async () => { if (on()) localStorage.setItem(RESTORE, "1"); await _imp(); if (!on()) return; const e = await engine(); const r = await e.afterAppRestore(); localStorage.removeItem(RESTORE); if (r.kept != null) toast("Household items already shared were kept as they are now"); };
