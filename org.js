@@ -47,7 +47,7 @@ const ORG = (() => {
   const meatOf = p => p.find(x => x === "beef" || x === "lamb" || x === "pork");
   function chapterOf(r) {
     const n = low(r.n), c = r.c, p = proteins(r), sweet = c === "treats" || c === "baking";
-    if (N.drink.test(n) && !/\b(cake|cookie|pudding|bread|chicken|beef|braised|glazed|poached)\b/.test(n)) return "drinks";
+    if (N.drink.test(n) && !p.length && !/\b(cake|cookie|pudding|bread|chicken|beef|braised|glazed|poached)\b/.test(n)) return "drinks";
     if (N.sauce.test(n) && !proteins(r).length && !/\b(en|al|with|bil|bel|and|in|de|con|mit|met|style)\b/.test(n) && !N.soup.test(n) && !N.salad.test(n)) return "sauces";
     if (c === "breakfast" || (N.breakfast.test(n) && !N.dessert.test(n) && c !== "treats")) return "breakfast";
     if (N.soup.test(n) || (c === "soup" && /simmer|broth|stock|soup|stew|chowder|bisque|pot\b/i.test((r.st || []).join(" ")))) return "soups";
@@ -109,6 +109,8 @@ const ORG = (() => {
   function place(r) {
     const o = typeof S !== "undefined" && S.place && S.place[r.id];
     if (o && CHN[o.ch]) return { ch: o.ch, sub: o.sub && SUB[o.ch].some(x => x[0] === o.sub) ? o.sub : subOf(r, o.ch), manual: true };
+    const F = typeof CLS_FIX !== "undefined" && CLS_FIX[r.id];
+    if (F && F.ch && CHN[F.ch]) return { ch: F.ch, sub: F.sub && SUB[F.ch].some(x => x[0] === F.sub) ? F.sub : subOf(r, F.ch), fixed: true };
     let p = cache.get(r.id); if (p && p.n === r.n) return p;
     const ch = chapterOf(r); p = { ch, sub: subOf(r, ch), n: r.n }; cache.set(r.id, p); return p;
   }

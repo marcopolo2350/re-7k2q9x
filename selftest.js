@@ -13,7 +13,7 @@
   const B = BASE, sl = ms => new Promise(r => setTimeout(r, ms));
   try {
     /* ---------- data ---------- */
-    ok("data", "1551 library recipes", B.length === 1551, B.length);
+    ok("data", "1551 original plus the Egyptian batch recipes", B.length === 1551 + (typeof EGYPT !== "undefined" ? EGYPT.length : 0), B.length);
     ok("data", "unique recipe ids", new Set(B.map(r => r.id)).size === B.length);
     ok("data", "ingredients and steps on every recipe", B.every(r => r.i.length && r.st.length));
     ok("data", "photo on every recipe", B.every(r => r.img), B.filter(r => !r.img).length + " missing");
