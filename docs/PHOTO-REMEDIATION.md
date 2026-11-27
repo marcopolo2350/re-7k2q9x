@@ -1,5 +1,37 @@
 # Photo licensing: survey and remediation plan
 
+## Update, 26 Nov 2026, later (verified photo batches)
+- **The survey finished.** The saved results are in `tools/commons-leads.json` and will not be searched again.
+  - 704 recipes have filename leads; 1 of these (Ful Medames) was already verified, so 703 are new leads.
+  - 455 were searched and had none.
+  - **392 searches errored** (rate limiting) and were not searched. The reviewer's figure of "845 without candidates" combines these two groups.
+- **How each batch is made:**
+  - Candidates are fetched politely: metadata in groups of 10 titles, standard 960 px thumbnails, an 8-second pause per image, and a stop on repeated HTTP 429.
+  - Each candidate is checked visually on a contact sheet against the recipe's ingredients.
+  - The licence, creator and restrictions are read from the Commons file metadata.
+  - Each accepted photo is resized to at most 800 px and re-encoded (which removes EXIF/GPS data), then recorded in `photo-manifest.json` with creator, licence, licence URL, source page, Commons SHA-1 and SHA-256 of the served file.
+  - The illustration stays as the fallback.
+- **Batch 1:** 40 priority recipes (Egyptian first, then comfort and quick dishes). 70 candidates were reviewed and **24 accepted**.
+  - Rejected examples: a map of Bessarabia, a rock band, a Tokyo shrine, KFC storefronts, portrait drawings, a grapevine, a turkey-dominated plate for a rice dish, and chili with sweet potato for a beef chili mac.
+  - Verified photos now total **26 of 1,551**.
+
+## Git history: what a cleanup would and would not reach (explanation only; nothing done)
+Checked 26 Nov 2026: the repository is **public**, with **0 forks**, 4 tags (`v1.0-culinary-baseline`, `v2.0-phase2`, `v3.0-phase3-4`, `v3.1-closure`) and 4 remote branches (`main`, `dev/phase3-4`, `dev/phase5-prep`, `dev/phase5`).
+- **History objects:** the 776 images exist as git blobs reachable from every commit before `5150ef3`. Deleting them in a new commit doesn't remove them; anyone can still check out an older commit.
+- **Tags:**
+  - All 4 tags point into the old history: three predate the removal, and `v3.1-closure` is the removal commit, whose parents still contain the images.
+  - A rewrite must move or re-create every tag. Otherwise the tags alone keep the images reachable.
+- **Branches:** every branch must be rewritten and force-pushed, including `dev/phase5`, which shares that history. A branch left unrewritten keeps everything.
+- **GitHub caches:**
+  - After a force-push, GitHub still serves old commits by their hash for some time, and pull-request references can keep them alive (there are no pull requests here).
+  - Removing them completely requires a request to GitHub Support to purge cached views and run garbage collection.
+- **Forks and clones:**
+  - There are currently no forks.
+  - Any existing clone (this machine, any other computer) keeps the old objects until it is deleted or re-cloned.
+  - A cleanup cannot reach copies already made by third parties, such as archives or search caches.
+- **Effect on you:** every commit hash changes. Old links to commits break, and the release notes in this repository refer to old hashes that would need updating.
+- **No destructive operation is authorized or has been done.** The procedure above ("History remediation") is unchanged.
+
 ## Update, 26 Nov 2026 (approved hybrid strategy, first step done)
 - **Removed from serving:** the 776 unverified web photos were deleted from the site and the current files. They remain in git history; see "History remediation" below.
 - **TheMealDB:** its 773 hotlinked photos are no longer shown.
