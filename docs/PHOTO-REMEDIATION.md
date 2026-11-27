@@ -15,7 +15,22 @@
   - Rejected examples: a map of Bessarabia, a rock band, a Tokyo shrine, KFC storefronts, portrait drawings, a grapevine, a turkey-dominated plate for a rice dish, and chili with sweet potato for a beef chili mac.
 - **Batch 2:** the next 60 recipes (Mexican, Latin, Chinese, Korean, Japanese, American, Cajun, Indian, Thai, Vietnamese, Filipino, Hawaiian). 115 candidates were reviewed and **43 accepted**.
   - Rejected examples: storefronts, curry pastes for a curry, a suckling pig for Cuban lechón asado, a tofu version of a pork dish, a lok lak photo for shaking beef, adobo cooked in coconut milk, and one photo with no recorded creator (its alternative was used).
-- **Verified photos now total 69 of 1,551.** The next batches continue with the remaining 594 leads, in the same priority order.
+- **Batch 3 (27 Nov 2026):** the next 80 recipes in priority order: Italian, Greek, British, Irish, Spanish, Portuguese, German, Moroccan, Indian, French, Chinese, Japanese and Caribbean dishes. 151 candidates were downloaded with no rate-limit errors, and **55 were accepted**.
+  - Rejected examples:
+    - for Sloppy Joes, a 1920s Havana bar called Sloppy Joe's;
+    - for Chicken Tetrazzini, a portrait of the opera singer Tetrazzini;
+    - KFC storefronts;
+    - for Pâté chinois, a porcelain figurine and a ceramic lion;
+    - a thatched cottage for Toad in the Hole;
+    - frozen cordon bleu and meatloaf in foil;
+    - a noodle soup for Szechuan beef;
+    - Hong Kong baked pork chop rice for smothered pork chops;
+    - a pizza for Marry Me Chicken;
+    - tomato fritters for Greek keftedes;
+    - three photos with no recorded creator.
+- **Verified photos now total 124 of 1,551.** 523 leads remain (703 − 180 reviewed), in the same priority order.
+  - Correction: the earlier figure of "594 remaining" after batch 2 was wrong; it was 603.
+- **Acceptance so far:** 24/40 (60%), 43/60 (72%) and 55/80 (69%), so 122 of 180 recipes (68%). At that rate, the remaining 523 leads might give about 355 more photos, about 480 in total. That is an estimate, not a promise.
 
 ## Git history: what a cleanup would and would not reach (explanation only; nothing done)
 Checked 26 Nov 2026: the repository is **public**, with **0 forks**, 4 tags (`v1.0-culinary-baseline`, `v2.0-phase2`, `v3.0-phase3-4`, `v3.1-closure`) and 4 remote branches (`main`, `dev/phase3-4`, `dev/phase5-prep`, `dev/phase5`).
