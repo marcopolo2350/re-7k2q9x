@@ -44,7 +44,15 @@
   await T("egypt-diet", "dietary results still show the ingredient-based disclaimer", () => [/ingredient list only/.test(gHTML("no dairy", "all"))]);
   /* ---------- no personal data changed by the batch ---------- */
   await T("egypt-data", "loading the batch does not change personal data", () => [JSON.stringify(S) === SAFE, "unchanged"]);
-  await T("egypt-layout", "the Egyptian collection sheet does not overflow the phone width", async () => { A.egypt(); await wait(300); const sh = document.getElementById("sheetIn"); const ok1 = sh.scrollWidth <= sh.clientWidth + 2; closeSheet(); return [ok1, ok1]; });
+  /* Layout: the sheet must not overflow horizontally at the viewport the test runs in. The viewport width is recorded in the result so phone (375px) and desktop (>=1024px) runs are distinguishable. Waits until the sheet has rendered (polls up to 3 s) instead of a fixed delay, which made the first run flaky. */
+  await T("egypt-layout", "the Egyptian collection sheet does not overflow horizontally (viewport recorded)", async () => {
+    A.egypt();
+    let sh = null;
+    for (let i = 0; i < 30; i++) { await wait(100); sh = document.getElementById("sheetIn"); if (sh && sh.children.length) break; }
+    const fits = !!sh && sh.scrollWidth <= sh.clientWidth + 2;
+    closeSheet();
+    return [fits, "viewport " + window.innerWidth + "px, sheet " + (sh ? sh.scrollWidth + "/" + sh.clientWidth : "missing")];
+  });
 
   /* ---------- reviewed classification corrections (classify-fixes.js) ---------- */
   const FIXIDS = Object.keys(CLS_FIX).map(Number);
