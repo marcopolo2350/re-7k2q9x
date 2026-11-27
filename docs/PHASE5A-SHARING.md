@@ -205,8 +205,10 @@ Limitations:
 - GitHub sets these free-tier terms and can change them.
 
 ## 10. Revised roadmap
-- **Phase 5A (this):** serverless household sharing, pantry transactions and recovery. **Waiting for your review and physical-iPhone testing.**
-- **Phase 5B:** TikTok import from links, descriptions and recipe text you supply; personal cookbook (collections, custom covers, your photos, printable export).
+- **Phase 5A (this):** serverless household sharing, pantry transactions and recovery. **Released to GitHub Pages on 27 Nov 2026 for physical iPhone testing** (see section 12). Physical acceptance is still outstanding.
+- **Phase 5B.1:** restructure the main cookbook into chapters and subchapters, with a clickable table of contents, alternative indexes, a featured Egyptian cookbook and book-style navigation.
+- **Phase 5B.2:** recipe importing (TikTok, Instagram, YouTube and website links, pasted text, family recipes), all parsed on the phone.
+- **Phase 5B.3:** personal cookbook builder and PDF export, using the same chapter system.
 - **Phase 6:** premium design, more licensed photos, accessibility and performance.
 - **Final acceptance:** physical iPhone testing and the complete regression.
 
@@ -218,3 +220,47 @@ Limitations:
   - Desktop Chromium has no AirDrop.
   - The app falls back to downloading the file. That path and the share call were tested with a simulated share sheet.
 - **A file opened in Messages** has to be saved to Files first, then opened from the app. iOS home-screen apps can't register as a file handler.
+
+## 12. Release closure (27 Nov 2026)
+
+### Targeted checks before release
+| Check | Result | Evidence (test) |
+|---|---|---|
+| Closing the app right after a pantry, grocery, meal-plan or personal-recipe edit | **Nothing is lost.** Each edit is saved to localStorage synchronously, and every export first compares the records with that saved state. So an edit that was never recorded is recorded at the next export, import or start. Every export also re-sends **all** shared lists, not only recent changes, so a file that never arrived loses nothing | release: "app closed right after each kind of edit", "...twice in a row: counted once", "a file that was never delivered loses nothing" |
+| **Gap found and fixed: photos** | Photos are sent only when they changed. Before this fix, a photo counted as "sent" as soon as the file was made, so a **cancelled share sheet** meant it would be skipped next time. Now it is marked sent only after the share sheet or download succeeds. **Include photos already sent** remains for a file that was shared but never opened | release: "a cancelled share sheet doesn't mark photos as sent" |
+| The 4-digit check number | **Only a mismatch check.** It is the first 32 bits of the household id, shown as a number from 0000 to 9999. That id is printed unencrypted on every file, because the app needs it to pick the key. The check number isn't a password, isn't used in encryption and can't open anything. Both screens that show it now say so. The 12 words remain the secret | release: "the check number is derived only from the household id printed on every file" |
+| Replacing a compromised household code | See "Replacing a household code" below | release: "new household code: new files use the new key only" |
+| Photos during interrupted imports and with storage full | Recipe photos and cooking-history photos follow the same all-or-nothing rule as everything else | 3 release photo tests, plus the existing "storage full for photos" and history-photo tests |
+| Service-worker update from the current production build | One browser address, first serving production `b212ab5` with test data and its service worker active, then this build in its place. After one reload: new shell cache `shell-2ef3ab7aa6`, old cache deleted, no worker left waiting. The pantry amount became one starting correction, and all data and 1,551 recipes were intact. Sharing stayed off and no sharing database was created. With the server stopped, the app still loaded offline | manual run in desktop Chromium |
+| Sharing off by default | Until someone taps Start or Join: no sharing settings, no sharing database, and saving records nothing | ui: "sharing is off by default" |
+| Plain text versus encrypted file | The grocery and meal-plan share screens explain both options. The buttons say **As an encrypted household file** and **As plain text (not encrypted)** | ui: "grocery sharing says plainly which option is encrypted" |
+
+**Results:**
+- Sharing suite **100/100**.
+- App regression **88/88** with `images=1`.
+- 0 Content Security Policy violations.
+
+All in desktop Chromium only.
+
+### Replacing a household code (a lost phone, or someone saw the words)
+1. On a phone you still have: Settings, Household sharing, Sharing settings, **Make a new household code**. Write the 12 new words down and confirm two of them.
+2. On the other phone: **Join with a code** using the new words. Its data stays.
+3. Compare the check numbers. They should match each other and differ from the old one.
+4. Send each other a file so both phones are up to date.
+
+What changes and what doesn't:
+- **New files** are encrypted with a key made from the new code only. Anyone with only the old code can't open them: the household id is different, so they are refused.
+- **Files already made with the old code stay encrypted with the old code.** Encryption can't be changed after a file has left the phone, so anyone with both the old words and one of those files can still open it. Delete old files you no longer need from Files, Messages and email.
+- Each phone keeps the old key only so it can still open your own older files. The preview marks such a file as "made with an older household code" before anything changes.
+- An old **backup** opens on a new phone only when the old 12 words are typed.
+
+### Rollback
+The production state before this release is tagged **`v5.0.1-pre-sharing-production`** (commit `b212ab5`, 124 photos, no sharing code). To roll back:
+1. On a computer, run `git checkout main`, then `git revert -m 1 <merge commit>`, then `git push`. This adds a new commit and rewrites no history. GitHub Pages redeploys in about a minute.
+2. Each phone gets the old version back after the app is closed and opened twice.
+
+What happens to data:
+- The app's own data is untouched.
+- Pantry amounts are kept as the amount the older version reads, alongside the transaction list it ignores.
+- The sharing database stays on the phone unused. Items under "Shared with me" don't show in the older version.
+- Restoring an **Export full backup** works in both versions.
