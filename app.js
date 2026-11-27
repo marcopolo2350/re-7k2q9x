@@ -24,7 +24,7 @@ const MAINS=[["chicken","🍗 Chicken"],["steak","🥩 Steak"],["beef","🍔 Bee
 function mainOf(r){const n=r.n.toLowerCase(),k=r.keys.join(" | ");const m=new Set();
 if(/chicken|turkey/.test(n+" "+k))m.add("chicken");
 if(/steak|ribeye|sirloin|filet mignon|strip|flank|skirt|porterhouse|t-bone|tenderloin/.test(n)||/sirloin|ribeye|flank steak|skirt steak|strip steak|filet mignon|beef tenderloin/.test(k))m.add("steak");
-if(/beef|brisket|oxtail|veal|meatball|burger|meatloaf|bolognese|chili/.test(n+" "+k))m.add("beef");
+if(/beef|brisket|oxtail|veal|meatball|burger|meatloaf|bolognese/.test(n+" "+k))m.add("beef");
 if(/pork|bacon|ham\b|sausage|chorizo|prosciutto|pancetta|carnitas|char siu/.test(n+" "+k))m.add("pork");
 if(/lamb|mutton|goat/.test(n+" "+k))m.add("lamb");
 if(/shrimp|prawn|salmon|cod|tuna|fish|crab|lobster|scallop|mussel|clam|squid|calamari|anchov|tilapia|catfish|crawfish|seafood|haddock|mackerel|sardine|trout/.test(n+" "+k))m.add("seafood");
@@ -38,6 +38,7 @@ function finishR(r){const g=[];for(const x of r.i){const em=GARN[x.item];if(em&&
 const BASE=ORIG.concat(RAW.slice(45)).map((a,i)=>finishR({id:i+1,n:a[0],c:a[1],e:a[2],t:a[3],df:typeof a[4]==="number"?DIFF[a[4]]:a[4],cz:a[5],s:a[6],d:a[7],i:a[8].split(";").map(parseIng),st:a[9].split("|"),hot:a[10]==="hot",gf:a[11]||GF[a[1]],h:a[12]||"",p:i<21?1:i<45?2:i<69?3:i<93?4:i<117?5:6,img:(typeof ORIG_IMG!=="undefined"&&ORIG_IMG[i+1])||""}));
 if(typeof NEWR!=="undefined")NEWR.forEach(a=>BASE.push(finishR({id:a[0],n:a[1],c:a[2],e:a[3],t:a[4],df:a[5],cz:a[6],s:a[7],d:a[8],i:a[9].split(";").map(parseIng),st:a[10].split("|"),hot:false,gf:GF[a[2]],h:"",p:7,img:"",cu:a[11]||""})));
 if(typeof WORLD!=="undefined")WORLD.forEach(a=>BASE.push(finishR({id:a[0],n:a[1],c:a[2],e:a[3],t:a[4],df:a[5],cz:a[6],s:a[7],d:a[8],i:a[9].split(";").map(parseIng),st:a[10].split("|"),hot:false,gf:GF[a[2]],h:"",p:7,img:a[11],cu:a[12]||""})));
+if(typeof EGYPT!=="undefined")EGYPT.forEach(a=>BASE.push(finishR({id:a[0],n:a[1],c:a[2],e:a[3],t:a[4],df:a[5],cz:a[6],s:a[7],d:a[8],i:a[9].split(";").map(parseIng),st:a[10].split("|"),hot:false,gf:GF[a[2]],h:"",p:7,img:"",cu:a[11]||""})));
 const CU_FIX={"United States":"American",France:"French",India:"Indian",Netherlands:"Dutch",Norway:"Norwegian",Colombia:"Colombian",Brazil:"Brazilian",Argentina:"Argentinian",Venezuela:"Venezuelan",Chile:"Chilean",Bulgaria:"Bulgarian",Albania:"Albanian",Croatian:"Croatian",Denmark:"Danish",Belgium:"Belgian",Cuba:"Cuban",Estonia:"Estonian",Slovakia:"Slovak",Laos:"Lao",Armenia:"Armenian",Austria:"Austrian",Andorra:"Andorran",Bangladesh:"Bangladeshi",Angola:"Angolan",Azerbaijan:"Azerbaijani",Afghanistan:"Afghan",Cambodia:"Cambodian",Dominica:"Dominican","Costa Rica":"Costa Rican",Botswana:"Botswanan",Aruba:"Aruban",Barbados:"Barbadian","Cayman Islands":"Caymanian","Antigua and Barbuda":"Antiguan",Bahamas:"Bahamian","Saudi Arabian":"Saudi"};
 const LVN={E:"Essential",R:"Recommended",O:"Optional",S:"Substitutable"};
 const LVR={E:3,S:2,R:1,O:0};
