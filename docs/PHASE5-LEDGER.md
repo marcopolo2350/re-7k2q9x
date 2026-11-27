@@ -15,7 +15,8 @@ Production baseline: `5150ef3` (tag `v3.1-closure`), with photo batches on `main
 - `5df8747`: Stages 1–4 code and tests. They were built together because one engine serves all four stages.
 - `85178d5`: merge of `main` (photo batch 1).
 - `aa72ced`: CSP and client-security tests.
-- Documentation commit: follows.
+- `295e124`: spec revision 2 and this ledger.
+- `61079f3`: merge of `main` (photo batch 2); both suites re-run after the merge, 88/88 and 86/86.
 
 **Not yet done:**
 - **UI.** Setup preview, QR, conflict screen, status chip.
