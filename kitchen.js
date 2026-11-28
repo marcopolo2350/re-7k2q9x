@@ -228,8 +228,8 @@ function speak(t) { if (!canSpeak()) { toast("Spoken steps aren't supported on t
 function saveSess() { if (!ck) return; S.cookSess = { id: ck.id, i: ck.i, s: ck.s, done: ck.done || {}, at: Date.now() }; save(); }
 const _openCook = openCook;
 openCook = function (id, serv) {
+  const ss = S.cookSess ? JSON.parse(JSON.stringify(S.cookSess)) : null; /* read before _openCook, whose first render saves a fresh session over it */
   _openCook(id, serv);
-  const ss = S.cookSess;
   if (ss && ss.id === id && Date.now() - ss.at < 2 * 864e5) { ck.i = ss.i; ck.s = serv || ss.s; ck.done = ss.done || {}; } else ck.done = {};
   saveSess(); rCook();
 };

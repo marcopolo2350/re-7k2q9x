@@ -47,6 +47,6 @@ const _tocHTMLBook = tocHTML;
 tocHTML = function () {
   const CS = chapterStarts();
   return _tocHTMLBook.apply(this, arguments)
-    .replace(/data-a="gOpen" data-id="(\d+)"/g, 'data-a="bookAt" data-id="$1"')
+    .replace(/data-a="gOpen" data-id="(-?\d+)"/g, 'data-a="bookAt" data-id="$1"')
     .replace(/data-a="gChapter" data-k="([^"]+)"/g, (m, k) => { const x = CS.find(x => x.c.k === k); const first = x && x.c.secs[0] && x.c.secs[0].ids[0]; return first ? `data-a="bookAt" data-id="${first}"` : m; });
 };
