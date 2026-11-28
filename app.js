@@ -194,6 +194,24 @@ function navOf(id){const F=flatBook();const k=F.findIndex(x=>x.id===id);if(k<0)r
 return{pos:k+1,n:F.length,prev:k>0?F[k-1].id:null,next:k<F.length-1?F[k+1].id:null,pch:first>0?chFirst(F[first-1].ci):null,nch:last<F.length-1?chFirst(F[last+1].ci):null,chName:B[ci].n,chPos:B[ci].no,chN:B.length,chNo:k-first+1,chCount:last-first+1}}
 function noteRecent(id){if(!Array.isArray(S.recent))S.recent=[];S.recent=[id,...S.recent.filter(x=>x!==id)].slice(0,12);save()}
 function isBm(id){return Array.isArray(S.bm)&&S.bm.includes(id)}
+/* Reading position: saved each time the cookbook turns a page; restored by "Continue reading". */
+function saveResume(part,id){if(!RID[id])return;S.resume={part:+part||0,id,at:Date.now()};save()}
+function readingBox(){
+  const rec=(Array.isArray(S.recent)?S.recent:[]).filter(id=>RID[id]).slice(0,6);
+  const bms=(Array.isArray(S.bm)?S.bm:[]).filter(id=>RID[id]);
+  const btn=(id)=>`<button class="rb-item" data-a="open" data-id="${id}" aria-label="Open ${esc(RID[id].n)}">${esc(RID[id].n)}</button>`;
+  let h="";
+  if(S.resume&&RID[S.resume.id])h+=`<button class="btn full big rose" data-a="resume" aria-label="Continue reading ${esc(RID[S.resume.id].n)}">▶ Continue reading: ${esc(RID[S.resume.id].n)}</button>`;
+  if(bms.length)h+=`<section class="rb" aria-label="Bookmarks"><h3>🔖 Bookmarks</h3><div class="rb-list">${bms.map(btn).join("")}</div></section>`;
+  if(rec.length)h+=`<section class="rb" aria-label="Recently viewed"><h3>Recently viewed</h3><div class="rb-list">${rec.map(btn).join("")}</div></section>`;
+  return h}
+/* Swipe between recipes in the recipe sheet. Only a mostly-horizontal gesture counts, so scrolling still works;
+   gestures that start on buttons, inputs, or the ingredient list are ignored so cooking and steppers are unaffected. */
+(function(){let sx=0,sy=0,st=0,skip=false;const sh=()=>document.getElementById("sheetIn");
+document.addEventListener("touchstart",e=>{const t=e.target;const s=document.getElementById("shw");if(!s||!s.classList.contains("open")||sheetKind!=="detail"){skip=true;return}
+skip=!!(t.closest&&t.closest("button,input,textarea,select,a,.ings,.rnav-row,[data-a]"));sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now()},{passive:true});
+document.addEventListener("touchend",e=>{if(skip||!det)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Date.now()-st>700)return;
+if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*2)return;const g=navOf(det.id);if(!g)return;if(dx<0&&g.next)openDetail(g.next);else if(dx>0&&g.prev)openDetail(g.prev)},{passive:true});})();
 function navBar(id){const g=navOf(id);if(!g)return"";const b=(a,t,v,lab)=>`<button class="btn ghost" data-a="${a}" data-id="${v}"${v?"":" disabled"} aria-label="${lab}">${t}</button>`;
 return`<nav class="rnav" aria-label="Reading navigation"><div class="rnav-pos">${esc(g.chName)} · recipe ${g.chNo} of ${g.chCount} · book ${g.pos} of ${g.n}</div><div class="rnav-row">${b("rchprev","‹ Chapter",g.pch,"Previous chapter")}${b("rprev","‹ Recipe",g.prev,"Previous recipe")}${b("rnext","Recipe ›",g.next,"Next recipe")}${b("rchnext","Chapter ›",g.nch,"Next chapter")}</div><button class="btn ${isBm(id)?"sage":"ghost"} full" data-a="bm" data-id="${id}" aria-pressed="${isBm(id)}">${isBm(id)?"🔖 Bookmarked":"🔖 Bookmark this recipe"}</button></nav>`}
 function rerSheet(){if(!sheetKind)return;const sc=$("#sheet").scrollTop;if(sheetKind==="detail")$("#sheetIn").innerHTML=dDetail();else if(sheetKind==="plan")$("#sheetIn").innerHTML=dPlan();$("#sheet").scrollTop=sc}
@@ -288,7 +306,7 @@ function mkCard(m,ready,uses){const r=m.r;const T=TIER[m.tier];return`<div class
 
 V.cookbook=()=>`<h1 class="h1">The Cookbook</h1>
 <div class="closedbook" data-a="openBook"><img src="${ICON}" alt=""><div class="cbt">ROSE'S EATS</div><div class="cbs">The Cookbook · ${RECIPES.length} recipes</div><div class="cbq">"What's my favorite meal?<br>The next one."</div></div>
-<button class="btn full big" data-a="openBook">📚 Open the cookbook</button>
+${readingBox()}<button class="btn full big" data-a="openBook">📚 Open the cookbook</button>
 <p class="center mut small">Turn your phone sideways 📱↔️ and swipe to flip the pages.</p>
 <div class="h2">Open to a part</div>
 ${[0,1,2,3,4,5,6,7].concat((S.mine||[]).length?[8]:[]).map(p=>`<button class="prow" data-a="openBook" data-part="${p}"><span class="mini" style="--g1:#9B3450;--g2:#5A1626;color:#E8C48C;font:700 18px var(--serif)">${p||"★"}</span><span class="pn">${p?PARTS[p]:"The whole book"}<small>${p?RECIPES.filter(r=>r.p===p).length:RECIPES.length} recipes</small></span></button>`).join("")}`;
@@ -320,7 +338,7 @@ const W=st.clientWidth,H=st.clientHeight;let w,h;if(land){h=H;w=Math.min(W/2,h*1
 const el=document.createElement("div");el.className="fb";el.innerHTML=bookPages();st.appendChild(el);
 pf=new St.PageFlip(el,{width:w,height:h,size:"fixed",showCover:true,usePortrait:true,mobileScrollSupport:true,maxShadowOpacity:.55,flippingTime:900,drawShadow:true,disableFlipByClick:true,clickEventForward:true,swipeDistance:25,showPageCorners:true,startPage:start||0,autoSize:true,startZIndex:0});
 pf.loadFromHTML(el.querySelectorAll(".bpg"));pf.on("flip",e=>syncCnt(e.data));syncCnt(start||0)}
-function syncCnt(p){const k=Math.floor((p-PG0)/2);const inR=p>=PG0&&k<BL.length;$("#bkCnt").textContent=inR?`${k+1} / ${BL.length}`:p<PG0?"Cover":"The End";$("#bkJump").value=inR?String(pageOf(k)):"0"}
+function syncCnt(p){const k=Math.floor((p-PG0)/2);const inR=p>=PG0&&k<BL.length;if(inR)saveResume(bookPart,BL[k].id);$("#bkCnt").textContent=inR?`${k+1} / ${BL.length}`:p<PG0?"Cover":"The End";$("#bkJump").value=inR?String(pageOf(k)):"0"}
 function curPage(){try{return pf?pf.getCurrentPageIndex():0}catch(e){return 0}}
 function refreshBook(){if(!pf)return;document.querySelectorAll("#stage [data-a=fav],#stage [data-a=cooked],#stage [data-a=basket]").forEach(b=>{const[on,t]=btnState(b.dataset.a,+b.dataset.id);b.classList.toggle("on",on);b.textContent=t})}
 /* ---------- SETTINGS ---------- */
@@ -368,6 +386,7 @@ rprev:el=>{const g=navOf(det.id);if(g&&g.prev)openDetail(g.prev)},
 rnext:el=>{const g=navOf(det.id);if(g&&g.next)openDetail(g.next)},
 rchprev:el=>{const g=navOf(det.id);if(g&&g.pch)openDetail(g.pch)},
 rchnext:el=>{const g=navOf(det.id);if(g&&g.nch)openDetail(g.nch)},
+resume:el=>{if(!S.resume||!RID[S.resume.id]){toast("Nothing to resume yet");return}lastWH=innerWidth+"x"+innerHeight;openBook(S.resume.part,S.resume.id)},
 bm:el=>{const id=+el.dataset.id;if(!Array.isArray(S.bm))S.bm=[];S.bm=isBm(id)?S.bm.filter(x=>x!==id):[id,...S.bm];save();toast(isBm(id)?"Bookmarked 🔖":"Bookmark removed");rerSheet()},
 planDlg:el=>planDlg(el.dataset.id?+el.dataset.id:0,el.dataset.date),
 pdPick:el=>{pd.id=+el.dataset.id;const r=R_(pd.id);pd.s=r.s;pd.m=r.c==="breakfast"?"B":r.c==="treats"?"S":r.c==="lunch"?"L":"D";rerSheet()},

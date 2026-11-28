@@ -54,6 +54,25 @@
   S.bm = S.bm.filter(x => x !== probe); save();
   ok("bookmark removed restores the previous state", !isBm(probe) && JSON.stringify(S.bm) === before);
 
+  /* Stage 1 completion: resume, bookmarks list, recently viewed, defaults and backward compatibility */
+  const keepResume = S.resume, keepBm = S.bm, keepRecent = S.recent;
+  S.resume = undefined; S.bm = []; S.recent = [];
+  ok("fresh data has empty bookmarks and recent lists, no resume point", (() => { const f = fresh(); return Array.isArray(f.bm) && Array.isArray(f.recent) && f.resume === undefined; })());
+  const oldShape = Object.assign({}, JSON.parse(JSON.stringify(fresh())));
+  delete oldShape.bm; delete oldShape.recent;
+  localStorage.setItem(KEY + "-readertest", JSON.stringify(oldShape));
+  ok("data saved before this release loads with empty reader fields", (() => { const d = JSON.parse(localStorage.getItem(KEY + "-readertest")); return d.bm === undefined && Array.isArray(fresh().bm); })());
+  localStorage.removeItem(KEY + "-readertest");
+  saveResume(0, first); ok("reading position is saved when a page is turned", S.resume && S.resume.id === first && S.resume.part === 0);
+  ok("Continue reading appears on the home screen", /data-a="resume"/.test(readingBox()));
+  S.resume = { part: 0, id: 99999999, at: 1 }; ok("a stale resume point does not produce a broken button", !/data-a="resume"/.test(readingBox()));
+  S.resume = keepResume;
+  S.bm = [first]; S.recent = [first, 7001];
+  const rb = readingBox();
+  ok("bookmarks appear as a labelled list with direct recipe buttons", /aria-label="Bookmarks"/.test(rb) && new RegExp('data-a="open" data-id="' + first + '"').test(rb));
+  ok("recently viewed appears as a labelled list", /aria-label="Recently viewed"/.test(rb) && /data-id="7001"/.test(rb));
+  S.bm = keepBm || []; S.recent = keepRecent || [];
+
   const pass = out.filter(x => x.pass).length;
   window.__readertest = { pass, fail: out.length - pass, total: out.length, ms: Math.round(performance.now() - t0), results: out };
   const box = document.createElement("div");

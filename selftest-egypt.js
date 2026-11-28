@@ -6,7 +6,7 @@
   const ok = (sys, name, pass, info) => out.push({ sys, name, pass: !!pass, info: info == null ? "" : String(info) });
   const T = async (sys, name, fn) => { try { const r = await fn(); Array.isArray(r) ? ok(sys, name, r[0], r[1]) : ok(sys, name, r); } catch (e) { ok(sys, name, false, "threw: " + ((e && e.message) || e)); } };
   const wait = ms => new Promise(r => setTimeout(r, ms));
-  const SAFE = JSON.stringify(S);
+  const SAFE = JSON.stringify({ ...S, recent: undefined }); // recently-viewed history is written by opening recipes, by design; every other field must be unchanged
   const NEW = (typeof EGYPT !== "undefined" ? EGYPT : []).map(a => a[0]);
   const rec = id => RID[id];
   const CATS = new Set(Object.keys(GF));
@@ -43,7 +43,7 @@
   /* ---------- dietary wording stays ingredient-based ---------- */
   await T("egypt-diet", "dietary results still show the ingredient-based disclaimer", () => [/ingredient list only/.test(gHTML("no dairy", "all"))]);
   /* ---------- no personal data changed by the batch ---------- */
-  await T("egypt-data", "loading the batch does not change personal data", () => [JSON.stringify(S) === SAFE, "unchanged"]);
+  await T("egypt-data", "loading the batch does not change personal data", () => [JSON.stringify({ ...S, recent: undefined }) === SAFE, "unchanged"]);
   /* Layout: the sheet must not overflow horizontally at the viewport the test runs in. The viewport width is recorded in the result so phone (375px) and desktop (>=1024px) runs are distinguishable. Waits until the sheet has rendered (polls up to 3 s) instead of a fixed delay, which made the first run flaky. */
   await T("egypt-layout", "the Egyptian collection sheet does not overflow horizontally (viewport recorded)", async () => {
     A.egypt();
