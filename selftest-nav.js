@@ -35,6 +35,25 @@
   await wait(1200);
   ok("turning a page advances the book", typeof curPage === "function" && curPage() > before, before + " → " + (typeof curPage === "function" ? curPage() : "?"));
   ok("book pages have the corner-drag/swipe engine attached", !!document.querySelector("#stage .stf__parent, #stage .stf__block, #stage [class*=stf]"));
+  /* In-book contents: chapter and section links land on the right recipe page */
+  ok("the book is in chapter order, matching the contents", BL.length === RECIPES.length && BL.every((r, k) => r.id === flatBook()[k].id));
+  ok("page 3 of the book is a clickable contents with every chapter", (() => { const h = bookTocHTML(); return ORG.book().chapters.every(c => h.includes(esc(c.n))) && (h.match(/class="tch-go"/g) || []).length === ORG.book().chapters.length; })());
+  {
+    const CS = chapterStarts(); let bad = 0;
+    for (const x of CS) { const id = BL[x.i] && BL[x.i].id; if (id !== x.c.secs[0].ids[0]) bad++; for (const s of x.secs) if (!BL[s.i] || !ORG.book().chapters.find(c => c.k === x.c.k).secs.find(q => q.name === s.name).ids.includes(BL[s.i].id)) bad++; }
+    ok("every chapter and section link points at its own first recipe", bad === 0, bad + " wrong");
+    const x = CS[Math.min(2, CS.length - 1)];
+    const link = document.querySelector(`#stage [data-a="bkGo"][data-i="${pageOf(x.i)}"]`) || null;
+    pf.turnToPage(2); syncCnt(2); await wait(400);
+    const btn = [...document.querySelectorAll('#stage .tch-go')].find(b => +b.dataset.i === pageOf(x.i));
+    if (btn) btn.click();
+    for (let i = 0; i < 30 && curPage() !== pageOf(x.i); i++) await wait(100);
+    ok("tapping a chapter in the book's contents turns to that chapter", curPage() === pageOf(x.i), "page " + curPage() + " want " + pageOf(x.i));
+    ok("the first recipe of each chapter carries a chapter divider", CS.every(x => /class="chdiv"/.test(chapDivHTML(BL[x.i], x.i))));
+  }
+  ok("a Contents button is always in the book's top bar", !!document.getElementById("bkToc"));
+  ok("the recipe picker groups every recipe by chapter", document.querySelectorAll("#bkJump optgroup").length === ORG.book().chapters.length && document.querySelectorAll("#bkJump optgroup option").length === RECIPES.length);
+  ok("recipes in the Contents sheet open in the book", /data-a="bookAt"/.test(tocHTML()) && !/data-a="gOpen"/.test(tocHTML()));
   closeBook(); await wait(50);
 
   tab = "recipes"; render(); await wait(50);
@@ -71,6 +90,20 @@
     const i = fryRec.st.findIndex(s => CF.ATTEND.test(s));
     openCook(fryRec.id); ck.done = {}; ck.i = i; rCook(); await wait(30);
     ok("attended steps (frying, constant stirring) suggest nothing else to do", !document.querySelector("#cook .cf-wait") && !!document.querySelector("#cook .cf-attend"), fryRec.n);
+    document.querySelector('#cook [data-a="closeCook"]').click(); await wait(30);
+  }
+  /* Edge cases: a step that mixes prep with cooking is never offered early, so ticking it can't skip cooking */
+  ok("a step that mixes chopping with cooking is not offered early", !CF.isPrep("Chop the onion and add it to the pan with the garlic.") && !CF.isPrep("Slice the chicken, then cook it in the skillet for 5 minutes."));
+  ok("a step that uses earlier cooked food is not offered early", !CF.isPrep("Dice the cooked potatoes and toss with the dressing.") && !CF.isPrep("Stir in the reserved pasta water and the chopped parsley."));
+  ok("pure preparation is offered early", CF.isPrep("Finely chop the parsley and mince the garlic.") && CF.isPrep("Measure the cream and grate the Parmesan."));
+  ok("frying, broiling and caramel steps count as needing attention", ["Deep-fry the fritters in batches.", "Broil for 2 minutes, watching closely.", "Cook the sugar until it turns to caramel."].every(s => CF.ATTEND.test(s)));
+  if (waitRec) {
+    const i = waitRec.st.findIndex((s, k) => CF.WAIT.test(s) && !CF.ATTEND.test(s) && waitRec.st.slice(k + 1).some(CF.isPrep));
+    openCook(waitRec.id); ck.done = {}; ck.i = i; rCook(); await wait(30);
+    const b = document.querySelector('#cook [data-a="cfDone"]'); const k = b ? +b.dataset.v : -1; if (b) b.click(); await wait(30);
+    document.querySelector('#cook [data-a="closeCook"]').click(); await wait(30);
+    openCook(waitRec.id); await wait(30);
+    ok("a step done during a wait is still done after leaving and reopening Cooking Mode", k >= 0 && ck.done[k] === 1 && ck.i === i);
     document.querySelector('#cook [data-a="closeCook"]').click(); await wait(30);
   }
   S.cookSess = null; save();

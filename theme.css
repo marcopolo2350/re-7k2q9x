@@ -54,3 +54,22 @@ body.night .art.cover .cv-t{color:#F3E6DA}
 .cf-go{background:none;border:0;text-align:left;padding:6px 0;min-height:40px;color:inherit;font-size:14px}
 body.night .cf-wait{background:#2A2E22}
 body.night .cf-attend{background:#3A231C}
+/* In-book contents */
+.btoc h2{margin:2px 0 6px}
+.btoc-lead{font:italic 14px/1.4 var(--serif);color:#6D5A4C;margin:0 0 10px}
+.tch{border-top:1px solid rgba(58,36,32,.15)}
+.tch summary{list-style:none;display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer}
+.tch summary::-webkit-details-marker{display:none}
+.tch summary::after{content:"";width:8px;height:8px;border-right:1.5px solid #9A4A33;border-bottom:1.5px solid #9A4A33;transform:rotate(45deg);margin:0 4px 4px 6px;transition:transform .2s}
+.tch[open] summary::after{transform:rotate(-135deg);margin-bottom:-2px}
+.tch-go{flex:1;display:flex;align-items:baseline;gap:10px;background:none;border:0;padding:10px 0;min-height:44px;text-align:left;color:#3A2420;font:600 16px var(--serif)}
+.tch-no{font:600 12px -apple-system,system-ui;color:#B0523A;min-width:18px}
+.tch-c{font:12px -apple-system,system-ui;color:#8C7A70}
+.tsec{display:flex;justify-content:space-between;width:100%;background:none;border:0;padding:8px 0 8px 28px;min-height:40px;color:#5A4038;font:14px var(--serif);text-align:left}
+.tsec span:last-child{font:12px -apple-system,system-ui;color:#8C7A70}
+.btoc-more{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btoc-more button{border:1px solid rgba(122,52,36,.35);background:none;border-radius:999px;padding:8px 14px;min-height:40px;color:#7A3424;font:13px -apple-system,system-ui}
+.chdiv{position:absolute;left:0;right:0;top:0;z-index:3;padding:14px 18px 22px;background:linear-gradient(180deg,rgba(42,22,16,.78),rgba(42,22,16,0));color:#F7EBDD;display:flex;flex-direction:column}
+.chdiv small{font:600 10px -apple-system,system-ui;letter-spacing:.2em;text-transform:uppercase;opacity:.85}
+.chdiv b{font:700 22px var(--serif)}
+.bk-toc{border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#F7EBDD;border-radius:10px;padding:0 10px;min-height:36px;font:600 13px -apple-system,system-ui}
