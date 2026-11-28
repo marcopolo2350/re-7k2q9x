@@ -22,6 +22,8 @@
     for (let k = i + 1; k < r.st.length && list.length < 3; k++) {
       if (ck.done[k]) continue;
       const s = r.st[k];
+      /* never suggest something that needs the equipment the waiting step is using (same oven, pot, pan, blender…) */
+      if (EQUIP.some(([, re]) => re.test(cur) && re.test(s))) continue;
       if (MEANWHILE.test(s) && !ATTEND.test(s)) list.push({ k, s, why: "The recipe says to do this meanwhile" });
       else if (isPrep(s)) list.push({ k, s, why: "Preparation only: no stove or oven needed" });
     }

@@ -1,9 +1,9 @@
-﻿/* Navigation restore, SVG icons, version display. Loaded after every other app script.
+/* Navigation restore, SVG icons, version display. Loaded after every other app script.
    - Restores direct tabs for the animated Cookbook and the Pantry (v3.0 had folded them away: the page-turn book was
      reachable from nowhere and Pantry was labelled "Kitchen").
    - Replaces decorative interface emojis with local SVG icons (food emojis used as recipe art are left alone).
    - Shows the running release/build under Settings and offers a data-safe update. */
-const RELEASE = "v5.8-chapters";
+const RELEASE = "v5.9-cookbooks";
 const ICONS = {
   home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   book: '<path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/>',
@@ -26,7 +26,11 @@ const ICONS = {
   signal: '<path d="M5 20v-4M10 20v-8M15 20V8M20 20V4"/>',
   heart: '<path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
-  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/>'
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', up: '<path d="M6 15l6-6 6 6"/>', down: '<path d="M6 9l6 6 6-6"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  speaker: '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>', speakeroff: '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 10l4 4M21 10l-4 4"/>',
+  play: '<path d="M8 5l11 7-11 7z"/>', pause: '<path d="M8 5v14M16 5v14"/>', edit: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>', box: '<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/>', plate: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/>'
 };
 const ic = (n, c) => `<svg class="ico ${c || ""}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[n] || ""}</svg>`;
 
@@ -46,19 +50,20 @@ V.home = function () {
     ? `<button class="nt" data-a="resume">${ic("book")}<b>Cookbook</b><small>Continue: ${esc(RID[S.resume.id].n)}</small></button>`
     : `<button class="nt" data-a="go" data-t="cookbook">${ic("book")}<b>Cookbook</b><small>Open the book</small></button>`;
   const pn = (S.pantry || []).length;
-  const tiles = `<div class="nav-tiles">${cook}<button class="nt" data-a="go" data-t="pantry">${ic("jar")}<b>Pantry</b><small>${pn} ingredient${pn === 1 ? "" : "s"} Â· what can I make</small></button></div>`;
+  const tiles = `<div class="nav-tiles">${cook}<button class="nt" data-a="go" data-t="pantry">${ic("jar")}<b>Pantry</b><small>${pn} ingredient${pn === 1 ? "" : "s"} · what can I make</small></button></div>`;
   return h.includes('<section class="dash">') ? h.replace('<section class="dash">', () => tiles + '<section class="dash">') : tiles + h;
 };
 
 /* ---- replace decorative emojis with SVG icons ---- */
-const EMOJI = [["ðŸ‘©â€ðŸ³", "pot"], ["ðŸ—“", "cal"], ["ðŸ ", "home"], ["ðŸ“–", "book"], ["ðŸ“š", "book"], ["ðŸ§º", "jar"], ["ðŸ›’", "cart"], ["â±", "timer"], ["ðŸ†˜", "help"], ["ðŸ”ª", "knife"],
-  ["ðŸ¥£", "bowl"], ["ðŸ›Ÿ", "shield"], ["âœ…", "check"], ["âš ", "warn"], ["â›”", "warn"], ["ðŸ”–", "bookmark"], ["ðŸŽ°", "dice"], ["ðŸŒ", "globe"], ["ðŸ”¥", "flame"], ["â­", "star"],
-  ["ðŸ“¶", "signal"], ["ðŸ’›", "heart"], ["ðŸ”Ž", "search"], ["ðŸ”", "search"], ["âš™", "gear"], ["ðŸ¤”", ""]];
+const EMOJI = [["👩‍🍳", "pot"], ["🗓", "cal"], ["🏠", "home"], ["📖", "book"], ["📚", "book"], ["🧺", "jar"], ["🛒", "cart"], ["⏱", "timer"], ["🆘", "help"], ["🔪", "knife"],
+  ["🥣", "bowl"], ["🛟", "shield"], ["✅", "check"], ["⚠", "warn"], ["⛔", "warn"], ["🔖", "bookmark"], ["🎰", "dice"], ["🌍", "globe"], ["🔥", "flame"], ["⭐", "star"],
+  ["📶", "signal"], ["💛", "heart"], ["🔎", "search"], ["🔍", "search"], ["⚙", "gear"], ["🤔", ""],
+  ["🔊", "speaker"], ["🔈", "speakeroff"], ["▶", "play"], ["⏸", "pause"], ["✏", "edit"], ["🗑", "trash"], ["⏰", "timer"], ["⬇", "down"], ["♥", "heart"], ["🥡", "box"], ["🍽", "plate"]];
 const EMAP = Object.fromEntries(EMOJI);
 const ERE = new RegExp("(" + EMOJI.map(e => e[0]).join("|") + ")\\uFE0F?", "g");
 /* any other pictographic emoji (with its joiners, skin tones and variation selectors) is decorative and removed */
 const XRE = /[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}]/u;
-const stripE = s => s.replace(/(?:[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}][\u{1F3FB}-\u{1F3FF}ï¸âƒ£]*â€?)+ ?/gu, "").replace(/^\s*[Â·â€¢]\s*/, "");
+const stripE = s => s.replace(/(?:[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}][\u{1F3FB}-\u{1F3FF}️⃣]*‍?)+ ?/gu, "").replace(/^\s*[·•]\s*/, "");
 function iconify(root) {
   if (!root) return;
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => {
@@ -77,7 +82,9 @@ function iconify(root) {
   });
 }
 let _iq = 0;
-new MutationObserver(() => { if (_iq) return; _iq = requestAnimationFrame(() => { _iq = 0; iconify(document.body); }); }).observe(document.body, { childList: true, subtree: true });
+
+/* batched on a short timer: a backgrounded page still runs it (an animation frame may never come), and it can never block the page */
+new MutationObserver(() => { if (_iq) return; _iq = setTimeout(() => { _iq = 0; iconify(document.body); }, 30); }).observe(document.body, { childList: true, subtree: true });
 
 /* ---- version display and data-safe update ---- */
 async function appBuild() {
@@ -91,21 +98,21 @@ settings = function () {
   _settingsNav();
   const host = document.querySelector("#sheetIn .d-body"); if (!host) return;
   const box = document.createElement("section"); box.className = "verbox"; box.setAttribute("aria-label", "App version");
-  box.innerHTML = `<h3>About this app</h3><div class="small">Release <b>${RELEASE}</b> Â· ${RECIPES.length} recipes</div><div class="small" id="verLine">Checking buildâ€¦</div>`;
+  box.innerHTML = `<h3>About this app</h3><div class="small">Release <b>${RELEASE}</b> · ${RECIPES.length} recipes</div><div class="small" id="verLine">Checking build…</div>`;
   host.appendChild(box);
   appBuild().then(({ running, latest }) => {
     const el = document.getElementById("verLine"); if (!el) return;
     if (running && latest && running !== latest) { el.innerHTML = `Running build ${esc(running)}; a newer build ${esc(latest)} is available. <button class="btn sm" data-a="appUpdate">Update now (keeps your data)</button>`; }
-    else el.textContent = running ? `Build ${running} Â· up to date` : "Build information unavailable offline";
+    else el.textContent = running ? `Build ${running} · up to date` : "Build information unavailable offline";
   });
 };
 A.appUpdate = async () => {
-  toast("Updatingâ€¦");
+  toast("Updating…");
   try { const r = await navigator.serviceWorker.getRegistration(); if (r) await r.update(); } catch (e) {}
   location.reload();
 };
 /* if a newer build is waiting at launch, say so once per session */
-appBuild().then(({ running, latest }) => { if (running && latest && running !== latest && !sessionStorage.getItem("upd")) { try { sessionStorage.setItem("upd", "1"); } catch (e) {} toast("A newer version is ready: Settings â†’ Update now"); } });
+appBuild().then(({ running, latest }) => { if (running && latest && running !== latest && !sessionStorage.getItem("upd")) { try { sessionStorage.setItem("upd", "1"); } catch (e) {} toast("A newer version is ready: Settings → Update now"); } });
 
 const _renderNav = render;
 render = function (k) { _renderNav(k); iconify(document.body); };

@@ -1,0 +1,189 @@
+/* Rose's EATS editorial layer (v5.9): calmer surfaces, serif hierarchy, fewer boxes, consistent controls.
+   Loaded after theme.css. Night mode keeps its own colours through the variables. */
+:root{--olive:#6B7A4B;--terra:#B0523A;--cream:#F7F0E4;--ink2:#5A4038;--r:14px}
+body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3,.d-t{font-family:var(--serif);letter-spacing:-.005em}
+h3{font-size:15px;font-family:-apple-system,system-ui,sans-serif;font-weight:700;letter-spacing:.1em;font-variant-caps:all-small-caps;color:var(--acc);margin:22px 0 8px}
+.d-t{font-size:28px;line-height:1.12;font-weight:700;margin:2px 0 8px}
+.kick{font:700 11px -apple-system,system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--acc)}
+.mut{color:var(--mut)}
+/* fewer heavy cards: hairline rules and paper instead of floating boxes */
+.card{box-shadow:none;border:1px solid var(--line);border-radius:var(--r);background:var(--paper)}
+.btn{border-radius:12px;font-weight:600;letter-spacing:.01em}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.gold{background:var(--terra);color:#FFF8EF;border:0;box-shadow:none}
+.chip{border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink2);padding:0 14px;font-size:14px}
+.chip.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.inp{border-radius:12px;border:1px solid var(--line);background:#FFFDF9;min-height:46px;font-size:16px}
+.inp:focus{outline:2px solid rgba(176,82,58,.35);outline-offset:1px;border-color:var(--terra)}
+.prow{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;box-shadow:none}
+#shw .d-body{max-width:640px;margin:0 auto}
+button,a{-webkit-tap-highlight-color:rgba(176,82,58,.12)}
+.nt{box-shadow:none;background:var(--paper)}
+.nt .ico{color:var(--terra)}
+@media (prefers-reduced-motion:no-preference){#shw .d-body{animation:rise .28s ease-out both}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---- the book's contents page, set like a printed cookbook ---- */
+.btoc-h{text-align:center;margin:4px 0 14px}
+.btoc-h h2{font:700 34px/1 var(--serif);margin:6px 0 6px;color:#3A2420}
+.btoc-h .btoc-lead{margin:0;font:italic 14px var(--serif);color:#7D6A5F}
+.btoc .tch{border-top:0}
+.tch-go{gap:10px;align-items:baseline}
+.tch-no{font:600 12px var(--serif);color:#B0523A;letter-spacing:.06em;min-width:22px}
+.tch-n{font:600 17px/1.25 var(--serif);color:#33221C}
+.tch-l{flex:1;min-width:16px;border-bottom:1px dotted rgba(58,36,32,.35);transform:translateY(-4px)}
+.tch-p,.tch-c{font:13px var(--serif);color:#7D6A5F;font-variant-numeric:oldstyle-nums tabular-nums}
+.tsec{gap:8px;align-items:baseline;padding-left:32px;font:14px/1.3 var(--serif)}
+.tsec span:first-child{text-align:left}
+.tsec i{font-style:normal;font:11px -apple-system,system-ui;color:#A08C80;margin-left:4px}
+.tsec span:last-child{font:13px var(--serif);color:#7D6A5F}
+.tch summary::after{margin-left:2px}
+.chdiv{padding:16px 20px 30px;background:linear-gradient(180deg,rgba(38,20,14,.82) 0,rgba(38,20,14,.55) 60%,rgba(38,20,14,0))}
+.chdiv b{font:700 26px/1.1 var(--serif);margin-top:2px}
+.chdiv-s{margin-top:6px;font:italic 12px/1.35 var(--serif);opacity:.85;max-width:90%}
+/* the first page of each chapter is a full chapter opener, set like a printed divider */
+.bphoto:has(.chdiv){background:#F4EBDC}
+.bphoto:has(.chdiv) .art,.bphoto:has(.chdiv) .bpt,.bphoto:has(.chdiv) .bpb{display:none!important}
+.bphoto:has(.chdiv)::before,.bphoto:has(.chdiv)::after{display:none!important}
+.bphoto .chdiv{position:absolute;inset:0;padding:12% 10%;background:#F4EBDC;color:#3A2420;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;border:1px solid rgba(122,52,36,.25);outline:1px solid rgba(122,52,36,.12);outline-offset:-8px}
+.bphoto .chdiv small{font:600 11px -apple-system,system-ui;letter-spacing:.28em;text-transform:uppercase;color:#B0523A;opacity:1}
+.bphoto .chdiv b{font:700 clamp(28px,8vw,40px)/1.08 var(--serif);color:#3A2420}
+.bphoto .chdiv b::after{content:"";display:block;width:40px;height:1px;background:#B0523A;margin:16px auto 0}
+.bphoto .chdiv-s{font:italic 14px/1.6 var(--serif);color:#6D5A4C;max-width:100%;opacity:1}
+.bphoto:has(.art.cover)::before,.bphoto:has(.art.cover)::after,.art.cover::after{display:none!important}
+.bphoto:has(.art.cover) .art{background-image:none}
+/* recipe screen: a typographic cover takes real space at the top, like a photo does */
+.d-art{position:relative}
+.d-art .art.cover{position:relative;height:min(30vh,240px)}
+
+/* ---- typographic covers composed for each kind of dish ---- */
+.art.cover .cv{transition:none}
+.art.cover.k-soup{background:#E9DCC5}
+.art.cover.k-soup .cv{border-radius:50%;aspect-ratio:1;flex:none;width:min(78%,78cqh);margin:auto;border-color:rgba(107,122,75,.55)}
+.art.cover.k-soup .cv-k{color:#56653A}
+.art.cover.k-sweet{background:#F4E1D8}
+.art.cover.k-sweet .cv{border:0;border-top:3px double rgba(176,82,58,.5);border-bottom:3px double rgba(176,82,58,.5);margin:14% 10px}
+.art.cover.k-sweet .cv-t{font-style:italic;font-weight:500}
+.art.cover.k-egypt{background:#2F3B2C}
+.art.cover.k-egypt .cv{border:1px solid rgba(214,184,120,.6);outline:1px solid rgba(214,184,120,.3);outline-offset:-6px}
+.art.cover.k-egypt .cv-k{color:#D6B878}
+.art.cover.k-egypt .cv-t{color:#F3E8D2}
+.art.cover.k-egypt .cv-r{background:#D6B878}
+.art.cover.k-comfort{background:#7A3424}
+.art.cover.k-comfort .cv{border-color:rgba(247,235,221,.35)}
+.art.cover.k-comfort .cv-k{color:#F0C9A8}
+.art.cover.k-comfort .cv-t{color:#FFF6EA}
+.art.cover.k-comfort .cv-r{background:#F0C9A8}
+.art.cover.k-fresh{background:#EEF0E2}
+.art.cover.k-fresh .cv{border-color:rgba(107,122,75,.45);border-radius:2px}
+.art.cover.k-fresh .cv-k{color:#56653A}
+.art.cover.k-fresh .cv-r{background:#6B7A4B}
+.art.cover.k-morning{background:#F6E6C4}
+.art.cover.k-morning .cv{border:0;border-left:2px solid rgba(176,82,58,.5);align-items:flex-start;text-align:left;margin:14px 18px}
+.art.cover.k-drink{background:#E4E6E0}
+.art.cover.k-drink .cv{border-radius:999px 999px 8px 8px}
+.art.cover.k-small{background:#F2E8D8}
+.art.cover.k-small .cv{border-style:dashed}
+.art.cover.k-family{background:#FFF8EC}
+.art.cover.k-family .cv{border:1px solid rgba(122,52,36,.35);box-shadow:inset 0 0 0 5px #FFF8EC,inset 0 0 0 6px rgba(122,52,36,.2)}
+.art.cover.k-family .cv-t{font-family:var(--script,var(--serif));font-weight:700}
+body.night .art.cover.k-soup,body.night .art.cover.k-sweet,body.night .art.cover.k-fresh,body.night .art.cover.k-morning,body.night .art.cover.k-drink,body.night .art.cover.k-small,body.night .art.cover.k-family{background:#2E2320}
+
+#cook .ck-top{position:sticky;top:0;z-index:5;background:var(--bg);box-shadow:0 8px 8px -8px rgba(60,30,15,.12)}
+/* ---- search results with quick actions ---- */
+.sres{flex-direction:column;align-items:stretch!important;gap:6px;padding:12px 0}
+.sres .pn{background:none;border:0;padding:0;color:var(--ink)}
+.sres .pn b{font:600 17px/1.25 var(--serif);display:block}
+.sres .pn small{color:var(--mut);font-size:13px}
+.qas{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.qa{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:50px;padding:4px 0;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink2);font:600 10.5px -apple-system,system-ui}
+.qa .ico{width:18px;height:18px;color:var(--terra)}
+.qa.on{background:#F3DED3;border-color:#E2BBA9;color:#7A3424}
+.backres{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:0 0 6px;padding:0 4px;background:none;border:0;color:var(--terra);font:600 14px -apple-system,system-ui;text-align:left}
+.backres span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:78vw}
+
+/* ---- cookbook screen tools ---- */
+.cbtools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 14px}
+.cbtool{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:74px;border:1px solid var(--line);border-radius:var(--r);background:var(--paper);color:var(--ink);font:600 13px -apple-system,system-ui}
+.cbtool .ico{width:22px;height:22px;color:var(--terra)}
+
+/* ---- personal cookbooks ---- */
+.mbcover{position:relative;aspect-ratio:3/4;max-width:260px;margin:4px auto 16px;border-radius:4px 10px 10px 4px;overflow:hidden;box-shadow:0 10px 30px rgba(60,30,15,.18),inset 6px 0 0 rgba(0,0,0,.08);display:flex}
+.mbcover>i{position:absolute;inset:0;background-size:cover;background-position:center}
+.mbcover>i::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55))}
+.mbc-in{position:relative;flex:1;margin:12px;border:1px solid currentColor;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;padding:14px;opacity:.97}
+.mbc-k{font:600 9.5px -apple-system,system-ui;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
+.mbc-in b{font:700 26px/1.1 var(--serif)}
+.mbc-s{font:italic 14px/1.3 var(--serif);opacity:.9}
+.mbc-r{width:34px;height:1px;background:currentColor;opacity:.6}
+.mbc-n{font:12px var(--serif);opacity:.75}
+.mbc-classic{background:#F4EBDC;color:#5A2A1E}
+.mbc-terracotta{background:#A9492F;color:#FFF3E6}
+.mbc-olive{background:#56653A;color:#F6F0DC}
+.mbc-ink{background:#2B211D;color:#E9D7BC}
+.mbcover:has(>i){color:#FFF6EA}
+.mbcover.sm{width:74px;max-width:74px;margin:0;flex:none;border-radius:2px 6px 6px 2px}
+.mbcover.sm .mbc-in{margin:5px;padding:4px;gap:3px}
+.mbcover.sm .mbc-in b{font-size:11px}
+.mbcover.sm .mbc-k,.mbcover.sm .mbc-s,.mbcover.sm .mbc-n,.mbcover.sm .mbc-r{display:none}
+.mbrow{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.mbrow-t{display:flex;flex-direction:column;gap:6px;min-width:0}
+.mbrow-t b{font:600 18px var(--serif)}
+.mbempty{font:italic 15px var(--serif);color:var(--mut);text-align:center;padding:24px 0}
+.mbh{margin-top:26px}
+.mbch{border-top:1px solid var(--line);padding:10px 0}
+.mbch-h{display:flex;align-items:center;gap:6px}
+.mbch-no{font:600 13px var(--serif);color:var(--terra);width:20px}
+.mbch-h .inp{flex:1;font:600 16px var(--serif);min-height:42px}
+.ib{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink2)}
+.ib:disabled{opacity:.3}
+.ib .ico{width:18px;height:18px}
+.mbr{display:flex;align-items:center;gap:6px;padding:8px 0 2px 26px}
+.mbr-n{flex:1;font:15px/1.3 var(--serif);min-width:0}
+.mbr-n small{font:11px -apple-system,system-ui;color:var(--olive);text-transform:uppercase;letter-spacing:.08em}
+.mbnote{margin:4px 0 6px 26px;width:calc(100% - 26px);min-height:38px;font-size:14px;padding:8px 10px}
+.mbpick{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:46px;padding:0 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);font:15px var(--serif);text-align:left}
+.mbpick small{font:600 12px -apple-system,system-ui;color:var(--terra)}
+.mbpick.in small{color:var(--mut)}
+.mbfoot{margin-top:24px;padding-top:12px;border-top:1px solid var(--line)}
+.cover.mycover{display:flex;align-items:center;justify-content:center;padding:18px;background:#EFE5D5}
+.cover.mycover .mbcover{width:min(100%,320px);max-width:none;margin:0}
+.myded{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+.ded-k{font:600 10px -apple-system,system-ui;letter-spacing:.22em;text-transform:uppercase;color:#9A4A33;margin-bottom:14px}
+.ded{font:italic 19px/1.5 var(--serif);color:#4A332B;max-width:300px}
+.mytch{padding:4px 0 8px}
+.mytch .tch-go{padding-bottom:4px}
+
+/* ---- print: the personal cookbook as a PDF ---- */
+#printBook{display:none}
+@media print{
+  body.printing>*:not(#printBook){display:none!important}
+  body.printing{background:#fff!important;overflow:visible!important}
+  body.printing #printBook{display:block;color:#2B1D17;font:11.5pt/1.5 Georgia,"Times New Roman",serif}
+  @page{size:auto;margin:16mm 15mm}
+  #printBook section{break-after:page;page-break-after:always}
+  #printBook section:last-child{break-after:auto}
+  .pr-cover{display:flex;align-items:center;justify-content:center;min-height:240mm}
+  .pr-cover .mbcover{width:120mm;max-width:none;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pr-cover .mbc-in b{font-size:30pt}
+  .pr-ded{display:flex;align-items:center;justify-content:center;min-height:200mm;text-align:center;font-style:italic;font-size:15pt}
+  .pr-toc h1,.pr-chap h1{font:700 26pt Georgia,serif;margin:0 0 8mm}
+  .pr-tc{margin:0 0 5mm}
+  .pr-tc b{display:block;font-size:13pt;margin-bottom:1.5mm;color:#7A3424}
+  .pr-tc a{display:block;color:#2B1D17;text-decoration:none;padding:.6mm 0 .6mm 6mm}
+  .pr-chap{display:flex;flex-direction:column;justify-content:center;min-height:200mm;text-align:center}
+  .pr-chap span{font:600 9pt -apple-system,system-ui,sans-serif;letter-spacing:.25em;text-transform:uppercase;color:#B0523A}
+  .pr-img{width:100%;max-height:85mm;object-fit:cover;border-radius:2mm;margin-bottom:5mm}
+  .pr-kick{font:600 8.5pt -apple-system,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#B0523A}
+  .pr-rec h2{font:700 22pt/1.1 Georgia,serif;margin:1mm 0 3mm}
+  .pr-d{font-style:italic;margin:0 0 2mm}
+  .pr-meta{font-size:9.5pt;color:#6D5A4C;margin:0 0 5mm}
+  .pr-cols{display:grid;grid-template-columns:2fr 3fr;gap:8mm}
+  .pr-cols h3{font:700 9pt -apple-system,system-ui,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:#7A3424;margin:0 0 2mm}
+  .pr-cols ul,.pr-cols ol{margin:0;padding-left:5mm}
+  .pr-cols li{margin:0 0 1.6mm;break-inside:avoid}
+  .pr-cols li b{margin-right:1.5mm}
+  .pr-note{margin-top:5mm;padding-top:3mm;border-top:.3mm solid #D8C8B5;font-size:10.5pt}
+  .pr-note b{color:#7A3424;margin-right:2mm}
+}

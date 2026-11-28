@@ -20,15 +20,14 @@ function chapterStarts() {
 }
 function bookTocHTML() {
   const CS = chapterStarts();
-  return `<div class="scr btoc"><div class="kick">Contents</div><h2>The Cookbook</h2>
-<p class="btoc-lead">${RECIPES.length} recipes in ${CS.length} chapters. Tap a chapter to go there; open it to see its sections.</p>
-${CS.map(x => `<details class="tch"><summary><button class="tch-go" data-a="bkGo" data-i="${pageOf(x.i)}"><span class="tch-no">${x.c.no}</span><span class="tch-n">${esc(x.c.n)}</span></button><span class="tch-c">${x.c.count}</span></summary>${x.secs.map(s => `<button class="tsec" data-a="bkGo" data-i="${pageOf(s.i)}"><span>${esc(s.name)}</span><span>${s.n}</span></button>`).join("")}</details>`).join("")}
+  return `<div class="scr btoc"><div class="btoc-h"><span class="kick">Rose's EATS</span><h2>Contents</h2><p class="btoc-lead">${RECIPES.length} recipes in ${CS.length} chapters</p></div>
+${CS.map(x => `<details class="tch"><summary><button class="tch-go" data-a="bkGo" data-i="${pageOf(x.i)}"><span class="tch-no">${String(x.c.no).padStart(2, "0")}</span><span class="tch-n">${esc(x.c.n)}</span><span class="tch-l"></span><span class="tch-p">${pageOf(x.i) + 1}</span></button></summary>${x.secs.map(s => `<button class="tsec" data-a="bkGo" data-i="${pageOf(s.i)}"><span>${esc(s.name)} <i>${s.n}</i></span><span class="tch-l"></span><span>${pageOf(s.i) + 1}</span></button>`).join("")}</details>`).join("")}
 <div class="btoc-more"><button data-a="tocOpen">A–Z index and search</button><button data-a="egypt">Egyptian collection</button></div></div>`;
 }
 function chapDivHTML(r, k) {
   if (bookPart) return "";
   const x = chapterStarts().find(x => x.i === k);
-  return x ? `<div class="chdiv"><small>Chapter ${x.c.no}</small><b>${esc(x.c.n)}</b></div>` : "";
+  return x ? `<div class="chdiv"><small>Chapter ${x.c.no}</small><b>${esc(x.c.n)}</b>${x.secs && x.secs.length > 1 ? `<span class="chdiv-s">${x.secs.map(s => esc(s.name)).join(" · ")}</span>` : ""}</div>` : "";
 }
 const _fillJumpBook = fillJump;
 fillJump = function () {
