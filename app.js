@@ -135,7 +135,7 @@ function gst(r){const c=CATS[r.c];return`--g1:${c.g[0]};--g2:${c.g[1]}`}
 const rImg=r=>(S.photos&&S.photos[r.id])||r.img||"";
 /* A real photograph, or nothing. Generated illustrations (data:image/svg) and emoji are no longer shown as recipe art;
    recipes without a verified photo get a typographic cover with the dish name instead. */
-const realImg=r=>{const u=rImg(r);return u&&!/^data:image\/svg/.test(u)?u:""};
+const realImg=r=>{const u=rImg(r);if(!u||/^data:image\/svg/.test(u))return"";if(!(S.photos&&S.photos[r.id])&&typeof PHOTO_HIDE!=="undefined"&&PHOTO_HIDE.has(r.id))return"";return u};
 const coverKick=r=>esc(r.cu||(CATS[r.c]?CATS[r.c].n:""));
 function art(r,cls){const u=realImg(r);if(u)return`<div class="art photo ${cls||""}" style="${gst(r)}"><i style="background-image:url('${u}')"></i></div>`;
 return`<div class="art cover ${cls||""}"><div class="cv"><span class="cv-k">${coverKick(r)}</span><span class="cv-t">${esc(r.n.replace(/\s*\(.*\)\s*$/,""))}</span><span class="cv-r"></span></div></div>`}

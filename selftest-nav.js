@@ -68,6 +68,12 @@
   const withPhoto = RECIPES.find(r => realImg(r));
   ok("recipes with a verified photo still show the photo", withPhoto ? /class="art photo/.test(art(withPhoto)) : true);
 
+  /* Photo audit: hidden mismatches show the cover; a personal photo still wins */
+  ok("photos flagged in the audit are not displayed", [...PHOTO_HIDE.keys()].every(id => !RID[id] || !realImg(RID[id])), PHOTO_HIDE.size + " hidden");
+  ok("103 audited library photos remain displayed", RECIPES.filter(r => realImg(r) && /^img\//.test(realImg(r))).length === 103, RECIPES.filter(r => realImg(r) && /^img\//.test(realImg(r))).length);
+  { const id = [...PHOTO_HIDE.keys()][0], had = S.photos[id]; S.photos[id] = "data:image/jpeg;base64,AAAA"; const shown = !!realImg(RID[id]); if (had) S.photos[id] = had; else delete S.photos[id];
+    ok("a photo you added yourself is shown even on an audited recipe", shown); }
+
   /* Cooking assistant: parallel prep is visible during a wait, never during attended steps */
   const CF = window.__cookflow;
   const waitRec = RECIPES.find(r => r.st.some((s, i) => CF.WAIT.test(s) && !CF.ATTEND.test(s) && r.st.slice(i + 1).some(CF.isPrep)));
