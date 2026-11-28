@@ -73,6 +73,19 @@
   }
   S.cookSess = null; save();
 
+  /* Bookmarks, recently viewed and reading position survive both backup formats */
+  {
+    const keep = { bm: S.bm, recent: S.recent, resume: S.resume };
+    const id1 = RECIPES[0].id, id2 = RECIPES[1].id;
+    S.bm = [id1]; S.recent = [id2, id1]; S.resume = { part: 0, id: id2, at: 1 };
+    const c = cleanImport(expCode());
+    ok("backup code restore keeps bookmarks, recently viewed and reading position", JSON.stringify(c.bm) === JSON.stringify([id1]) && c.recent[0] === id2 && c.resume && c.resume.id === id2);
+    let fb = null; try { fb = await fullBackup(); } catch (e) {}
+    const v = fb ? validateBackup(JSON.parse(JSON.stringify(fb))) : null;
+    ok("full backup file keeps bookmarks, recently viewed and reading position", !!v && v.ok && JSON.stringify(v.st.bm) === JSON.stringify([id1]) && v.st.resume && v.st.resume.id === id2, v ? (v.errs || []).join("; ") : "no fullBackup");
+    Object.assign(S, keep); save();
+  }
+
   A.settings(); await wait(100);
   ok("Settings shows the running release", new RegExp(RELEASE.replace(/[.]/g, "\\.")).test(document.getElementById("sheetIn").textContent));
   closeSheet();

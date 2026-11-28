@@ -106,3 +106,15 @@ if (!TABS.some(t => t[0] === tab)) tab = "home";
 render(true);
 
 if (/[?&]selftest=nav/.test(location.search)) setTimeout(() => { const b = document.createElement("script"); b.src = "selftest-nav.js?v=" + Date.now(); document.body.appendChild(b); }, 1500);
+
+/* Backup codes (ROSESEATS1) are restored through a field-by-field whitelist; keep the reader fields too. */
+const _cleanImportNav = cleanImport;
+cleanImport = function (txt) {
+  const f = _cleanImportNav(txt);
+  let o = null; const t = (txt || "").trim();
+  try { o = t.startsWith("ROSESEATS1:") ? JSON.parse(decodeURIComponent(escape(atob(t.slice(11))))) : JSON.parse(t); if (o && o.state) o = o.state; } catch (e) { return f; }
+  if (Array.isArray(o.bm)) f.bm = o.bm.filter(x => RID[x]);
+  if (Array.isArray(o.recent)) f.recent = o.recent.filter(x => RID[x]).slice(0, 12);
+  if (o.resume && RID[o.resume.id]) f.resume = { part: +o.resume.part || 0, id: +o.resume.id, at: +o.resume.at || 0 };
+  return f;
+};
