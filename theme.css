@@ -20,3 +20,16 @@ body.night{--acc:#E09A80;--sage:#9FB07A}
 .verbox h3{margin:0 0 6px;font-size:14px}
 .btn{min-height:44px}
 .chip{min-height:40px}
+/* Typographic recipe covers (no photograph available) */
+.art.cover{background:#F2E8D8;display:flex;align-items:stretch;justify-content:stretch}
+.art.cover::before{display:none}
+.art.cover .cv{position:relative;flex:1;margin:8px;border:1px solid rgba(122,52,36,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px 12px;gap:6px}
+.art.cover .cv-k{font:600 10px/1.2 -apple-system,system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#9A4A33}
+.art.cover .cv-t{font:600 clamp(15px,12cqh,30px)/1.15 var(--serif);color:#33221C;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.art.cover .cv-r{width:28px;height:1px;background:#B0523A;opacity:.6}
+.mini.cover{background:#F2E8D8;color:#7A3424;font:600 20px var(--serif);border:1px solid rgba(122,52,36,.25)}
+.mini.photo{background:#eee}
+body.night .art.cover,body.night .mini.cover{background:#2E2320}
+body.night .art.cover .cv-t{color:#F3E6DA}
+.bphoto:has(.art.cover) .bpb,.bphoto:has(.art.cover) .bpt{display:none}
+.bphoto .art.cover .cv-t{font-size:clamp(22px,9cqh,40px)}

@@ -133,8 +133,13 @@ let tab="home";
 function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),2100)}
 function gst(r){const c=CATS[r.c];return`--g1:${c.g[0]};--g2:${c.g[1]}`}
 const rImg=r=>(S.photos&&S.photos[r.id])||r.img||"";
-function art(r,cls){const u=rImg(r);return`<div class="art ${u?"photo ":""}${cls||""}" style="${gst(r)}"><span class="ae">${r.e}</span>${u?`<i style="background-image:url('${u}')"></i>`:""}</div>`}
-const mini=(r,lg)=>{const u=rImg(r);return`<span class="mini${lg?" lg":""}" style="${gst(r)}">${r.e}${u?`<i style="background-image:url('${u}')"></i>`:""}</span>`};
+/* A real photograph, or nothing. Generated illustrations (data:image/svg) and emoji are no longer shown as recipe art;
+   recipes without a verified photo get a typographic cover with the dish name instead. */
+const realImg=r=>{const u=rImg(r);return u&&!/^data:image\/svg/.test(u)?u:""};
+const coverKick=r=>esc(r.cu||(CATS[r.c]?CATS[r.c].n:""));
+function art(r,cls){const u=realImg(r);if(u)return`<div class="art photo ${cls||""}" style="${gst(r)}"><i style="background-image:url('${u}')"></i></div>`;
+return`<div class="art cover ${cls||""}"><div class="cv"><span class="cv-k">${coverKick(r)}</span><span class="cv-t">${esc(r.n.replace(/\s*\(.*\)\s*$/,""))}</span><span class="cv-r"></span></div></div>`}
+const mini=(r,lg)=>{const u=realImg(r);return u?`<span class="mini photo${lg?" lg":""}"><i style="background-image:url('${u}')"></i></span>`:`<span class="mini cover${lg?" lg":""}" aria-hidden="true">${esc((r.n.trim()[0]||"·").toUpperCase())}</span>`};
 function confetti(){const E=["🍕","🌮","🍝","🍔","🥞","🍪","🍣","🥑","🧀","🍩","🍲","♥"];for(let k=0;k<28;k++){const s=document.createElement("span");s.className="cf";s.textContent=E[k%E.length];s.style.left=Math.random()*100+"vw";s.style.animationDelay=Math.random()*.5+"s";s.style.fontSize=(18+Math.random()*20)+"px";s.style.setProperty("--dx",(Math.random()*140-70)+"px");document.body.appendChild(s);setTimeout(()=>s.remove(),3200)}}
 /* ---------- tabs & render ---------- */
 const TABS=[["home","🏠","Home"],["recipes","📖","Recipes"],["cookbook","📚","Cookbook"],["plan","🗓️","Planner"],["pantry","🧺","Pantry"],["groceries","🛒","Groceries"]];
