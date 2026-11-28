@@ -118,6 +118,7 @@ const _renderNav = render;
 render = function (k) { _renderNav(k); iconify(document.body); };
 if (!TABS.some(t => t[0] === tab)) tab = "home";
 render(true);
+document.body.classList.add("navready");
 
 if (/[?&]selftest=nav/.test(location.search)) setTimeout(() => { const b = document.createElement("script"); b.src = "selftest-nav.js?v=" + Date.now(); document.body.appendChild(b); }, 1500);
 

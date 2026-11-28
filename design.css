@@ -24,6 +24,9 @@ button,a{-webkit-tap-highlight-color:rgba(176,82,58,.12)}
 @media (prefers-reduced-motion:no-preference){#shw .d-body{animation:rise .28s ease-out both}}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
+/* no flash of the old tab bar and header emoji while scripts load; shown anyway after 4 s if a script failed */
+body:not(.navready) #tabs,body:not(.navready) .top button{visibility:hidden;animation:navshow 0s 4s forwards}
+@keyframes navshow{to{visibility:visible}}
 /* ---- the book's contents page, set like a printed cookbook ---- */
 .btoc-h{text-align:center;margin:4px 0 14px}
 .btoc-h h2{font:700 34px/1 var(--serif);margin:6px 0 6px;color:#3A2420}
