@@ -25,7 +25,9 @@
   if (tab === "cookbook") {
     ok("cookbook screen has Open the cookbook", !!document.querySelector('#view [data-a="openBook"]'));
     ok("cookbook screen links to the searchable recipe list", !!document.querySelector('#view [data-t="recipes"]'));
-    click('#view [data-a="openBook"]'); await wait(900);
+    click('#view [data-a="openBook"]');
+    for (let i = 0; i < 60 && !pf; i++) await wait(100); /* the book is built on the next frame; with 1,500+ pages that can take a few seconds */
+    await wait(300);
   }
   ok("the page-turn book opens", document.getElementById("book").classList.contains("open") && !!pf, "page-flip " + (pf ? "ready" : "missing"));
   const before = typeof curPage === "function" ? curPage() : -1;
