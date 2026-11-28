@@ -41,6 +41,38 @@
   for (const k of ["plan", "groceries", "cook"]) { tab = k; render(); await wait(30); }
   ok("Plan, Shop and Cook screens render without overflow", document.documentElement.scrollWidth <= innerWidth + 1);
 
+  /* Typographic covers instead of emoji or cartoon art */
+  const noPhoto = RECIPES.find(r => !realImg(r));
+  ok("recipes without a verified photo get a typographic cover, not emoji art", noPhoto ? /class="art cover/.test(art(noPhoto)) && !art(noPhoto).includes(noPhoto.e) : true, noPhoto ? noPhoto.n : "all have photos");
+  const withPhoto = RECIPES.find(r => realImg(r));
+  ok("recipes with a verified photo still show the photo", withPhoto ? /class="art photo/.test(art(withPhoto)) : true);
+
+  /* Cooking assistant: parallel prep is visible during a wait, never during attended steps */
+  const CF = window.__cookflow;
+  const waitRec = RECIPES.find(r => r.st.some((s, i) => CF.WAIT.test(s) && !CF.ATTEND.test(s) && r.st.slice(i + 1).some(CF.isPrep)));
+  if (waitRec) {
+    const i = waitRec.st.findIndex((s, k) => CF.WAIT.test(s) && !CF.ATTEND.test(s) && waitRec.st.slice(k + 1).some(CF.isPrep));
+    openCook(waitRec.id); ck.done = {}; ck.i = i; rCook(); await wait(50);
+    const wbox = document.querySelector("#cook .cf-wait");
+    ok("during a waiting step, later prep appears under While you wait", !!wbox, waitRec.n + " step " + (i + 1));
+    const btn = wbox && wbox.querySelector('[data-a="cfDone"]');
+    const k = btn ? +btn.dataset.v : -1;
+    if (btn) btn.click(); await wait(30);
+    ok("ticking a While-you-wait task marks that later step done without moving the current step", k > i && ck.done[k] === 1 && ck.i === i);
+    A.kNext(); let guard = 0; while (ck.i < k && guard++ < 50) A.kNext();
+    ok("Next skips a step already done during the wait", ck.i !== k || k === waitRec.st.length - 1);
+    ok("the whole recipe overview is available while cooking", !!document.querySelector("#cook .cf-ov"));
+    A.closeCook ? A.closeCook() : document.querySelector('#cook [data-a="closeCook"]').click(); await wait(30);
+  } else ok("a recipe with a waiting step and later prep exists for testing", false);
+  const fryRec = RECIPES.find(r => r.st.some(s => CF.ATTEND.test(s)));
+  if (fryRec) {
+    const i = fryRec.st.findIndex(s => CF.ATTEND.test(s));
+    openCook(fryRec.id); ck.done = {}; ck.i = i; rCook(); await wait(30);
+    ok("attended steps (frying, constant stirring) suggest nothing else to do", !document.querySelector("#cook .cf-wait") && !!document.querySelector("#cook .cf-attend"), fryRec.n);
+    document.querySelector('#cook [data-a="closeCook"]').click(); await wait(30);
+  }
+  S.cookSess = null; save();
+
   A.settings(); await wait(100);
   ok("Settings shows the running release", new RegExp(RELEASE.replace(/[.]/g, "\\.")).test(document.getElementById("sheetIn").textContent));
   closeSheet();
