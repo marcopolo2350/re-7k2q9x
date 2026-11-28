@@ -1,9 +1,9 @@
-/* Navigation restore, SVG icons, version display. Loaded after every other app script.
+﻿/* Navigation restore, SVG icons, version display. Loaded after every other app script.
    - Restores direct tabs for the animated Cookbook and the Pantry (v3.0 had folded them away: the page-turn book was
      reachable from nowhere and Pantry was labelled "Kitchen").
    - Replaces decorative interface emojis with local SVG icons (food emojis used as recipe art are left alone).
    - Shows the running release/build under Settings and offers a data-safe update. */
-const RELEASE = "v5.7-nav-restore";
+const RELEASE = "v5.8-chapters";
 const ICONS = {
   home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   book: '<path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/>',
@@ -46,27 +46,34 @@ V.home = function () {
     ? `<button class="nt" data-a="resume">${ic("book")}<b>Cookbook</b><small>Continue: ${esc(RID[S.resume.id].n)}</small></button>`
     : `<button class="nt" data-a="go" data-t="cookbook">${ic("book")}<b>Cookbook</b><small>Open the book</small></button>`;
   const pn = (S.pantry || []).length;
-  const tiles = `<div class="nav-tiles">${cook}<button class="nt" data-a="go" data-t="pantry">${ic("jar")}<b>Pantry</b><small>${pn} ingredient${pn === 1 ? "" : "s"} · what can I make</small></button></div>`;
+  const tiles = `<div class="nav-tiles">${cook}<button class="nt" data-a="go" data-t="pantry">${ic("jar")}<b>Pantry</b><small>${pn} ingredient${pn === 1 ? "" : "s"} Â· what can I make</small></button></div>`;
   return h.includes('<section class="dash">') ? h.replace('<section class="dash">', () => tiles + '<section class="dash">') : tiles + h;
 };
 
 /* ---- replace decorative emojis with SVG icons ---- */
-const EMOJI = [["👩‍🍳", "pot"], ["🗓", "cal"], ["🏠", "home"], ["📖", "book"], ["📚", "book"], ["🧺", "jar"], ["🛒", "cart"], ["⏱", "timer"], ["🆘", "help"], ["🔪", "knife"],
-  ["🥣", "bowl"], ["🛟", "shield"], ["✅", "check"], ["⚠", "warn"], ["⛔", "warn"], ["🔖", "bookmark"], ["🎰", "dice"], ["🌍", "globe"], ["🔥", "flame"], ["⭐", "star"],
-  ["📶", "signal"], ["💛", "heart"], ["🔎", "search"], ["🔍", "search"], ["⚙", "gear"], ["🤔", ""]];
+const EMOJI = [["ðŸ‘©â€ðŸ³", "pot"], ["ðŸ—“", "cal"], ["ðŸ ", "home"], ["ðŸ“–", "book"], ["ðŸ“š", "book"], ["ðŸ§º", "jar"], ["ðŸ›’", "cart"], ["â±", "timer"], ["ðŸ†˜", "help"], ["ðŸ”ª", "knife"],
+  ["ðŸ¥£", "bowl"], ["ðŸ›Ÿ", "shield"], ["âœ…", "check"], ["âš ", "warn"], ["â›”", "warn"], ["ðŸ”–", "bookmark"], ["ðŸŽ°", "dice"], ["ðŸŒ", "globe"], ["ðŸ”¥", "flame"], ["â­", "star"],
+  ["ðŸ“¶", "signal"], ["ðŸ’›", "heart"], ["ðŸ”Ž", "search"], ["ðŸ”", "search"], ["âš™", "gear"], ["ðŸ¤”", ""]];
 const EMAP = Object.fromEntries(EMOJI);
 const ERE = new RegExp("(" + EMOJI.map(e => e[0]).join("|") + ")\\uFE0F?", "g");
+/* any other pictographic emoji (with its joiners, skin tones and variation selectors) is decorative and removed */
+const XRE = /[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}]/u;
+const stripE = s => s.replace(/(?:[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}][\u{1F3FB}-\u{1F3FF}ï¸âƒ£]*â€?)+ ?/gu, "").replace(/^\s*[Â·â€¢]\s*/, "");
 function iconify(root) {
   if (!root) return;
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => {
-    if (!ERE.test(n.nodeValue)) { ERE.lastIndex = 0; return NodeFilter.FILTER_REJECT; } ERE.lastIndex = 0;
-    const p = n.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA|OPTION|TITLE|SELECT)$/.test(p.nodeName) || (p.closest && p.closest("#book,#stage"))) return NodeFilter.FILTER_REJECT;
+    if (!XRE.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
+    const p = n.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA|TITLE)$/.test(p.nodeName)) return NodeFilter.FILTER_REJECT;
     return NodeFilter.FILTER_ACCEPT; } });
   const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
   nodes.forEach(n => {
+    /* in pickers and inside the book's pages, emojis are simply removed; elsewhere known ones become SVG icons */
+    if (/^(OPTION|SELECT|OPTGROUP)$/.test(n.parentNode.nodeName) || n.parentNode.closest("#book,#stage")) { n.nodeValue = stripE(n.nodeValue); return; }
     const t = n.nodeValue, frag = document.createDocumentFragment(); let last = 0, m; ERE.lastIndex = 0;
     while ((m = ERE.exec(t))) { frag.appendChild(document.createTextNode(t.slice(last, m.index))); const k = EMAP[m[1]]; if (k) { const s = document.createElement("span"); s.className = "ei"; s.innerHTML = ic(k); frag.appendChild(s); } last = m.index + m[0].length; }
-    frag.appendChild(document.createTextNode(t.slice(last))); n.parentNode.replaceChild(frag, n);
+    frag.appendChild(document.createTextNode(t.slice(last)));
+    frag.childNodes.forEach(c => { if (c.nodeType === 3) c.nodeValue = stripE(c.nodeValue); });
+    n.parentNode.replaceChild(frag, n);
   });
 }
 let _iq = 0;
@@ -84,21 +91,21 @@ settings = function () {
   _settingsNav();
   const host = document.querySelector("#sheetIn .d-body"); if (!host) return;
   const box = document.createElement("section"); box.className = "verbox"; box.setAttribute("aria-label", "App version");
-  box.innerHTML = `<h3>About this app</h3><div class="small">Release <b>${RELEASE}</b> · ${RECIPES.length} recipes</div><div class="small" id="verLine">Checking build…</div>`;
+  box.innerHTML = `<h3>About this app</h3><div class="small">Release <b>${RELEASE}</b> Â· ${RECIPES.length} recipes</div><div class="small" id="verLine">Checking buildâ€¦</div>`;
   host.appendChild(box);
   appBuild().then(({ running, latest }) => {
     const el = document.getElementById("verLine"); if (!el) return;
     if (running && latest && running !== latest) { el.innerHTML = `Running build ${esc(running)}; a newer build ${esc(latest)} is available. <button class="btn sm" data-a="appUpdate">Update now (keeps your data)</button>`; }
-    else el.textContent = running ? `Build ${running} · up to date` : "Build information unavailable offline";
+    else el.textContent = running ? `Build ${running} Â· up to date` : "Build information unavailable offline";
   });
 };
 A.appUpdate = async () => {
-  toast("Updating…");
+  toast("Updatingâ€¦");
   try { const r = await navigator.serviceWorker.getRegistration(); if (r) await r.update(); } catch (e) {}
   location.reload();
 };
 /* if a newer build is waiting at launch, say so once per session */
-appBuild().then(({ running, latest }) => { if (running && latest && running !== latest && !sessionStorage.getItem("upd")) { try { sessionStorage.setItem("upd", "1"); } catch (e) {} toast("A newer version is ready: Settings → Update now"); } });
+appBuild().then(({ running, latest }) => { if (running && latest && running !== latest && !sessionStorage.getItem("upd")) { try { sessionStorage.setItem("upd", "1"); } catch (e) {} toast("A newer version is ready: Settings â†’ Update now"); } });
 
 const _renderNav = render;
 render = function (k) { _renderNav(k); iconify(document.body); };
