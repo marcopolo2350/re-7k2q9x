@@ -156,7 +156,7 @@ const world=pick(RECIPES.filter(r=>r.p===7&&!["treats","sides"].includes(r.c)),1
 const sweet=pick(RECIPES.filter(r=>r.c==="treats"),10,day+3);
 const tile=(a,i,n,x)=>`<button class="qt" data-a="${a}"${x||""}><span>${i}</span>${n}</button>`;
 return`<section class="hero2"><div class="hz"><img src="${ICON}" alt=""><div><div class="ht">Hi Rose ♡</div><div class="hs">Favorite meal? <b>The next one.</b></div></div></div>
-<button class="btn gold full" data-a="decide">🤔 What are we eating tonight?</button></section>
+<button class="btn gold full" data-a="decide">What are we eating tonight?</button></section>
 <div class="qa">${tile("spin","🎰","Surprise me")}${tile("pantryMake","🧺","Use what we have")}${tile("go","🗓️","Plan the week",' data-t="plan"')}${tile("go","🛒","Groceries",' data-t="groceries"')}${tile("addMine","⭐","Add a recipe")}${tile("tkSearch","🎵","Search TikTok")}${tile("openBook","📚","Cookbook")}${tile("timers","⏱","Timer")}</div>
 <div id="spinOut"></div>
 <section class="card"><div class="row sb"><b>Today${ti>=0?" · "+DAYS[ti]:""}</b><button class="link" data-a="go" data-t="plan">Planner →</button></div>
@@ -505,7 +505,7 @@ ck.i=Math.max(-1,ck.i)}
 /* ---- dinner decider ---- */
 const DZ={time:0,vibe:"any",useP:false,seed:1};
 function decide(){let L=RECIPES.filter(r=>{if(DZ.time&&r.t>DZ.time)return false;const v=DZ.vibe;if(v==="any")return!["breakfast","treats"].includes(r.c);if(v==="cozy")return r.cz>=9&&r.c!=="treats";if(v==="light")return["light","lunch"].includes(r.c);if(v==="fav")return isFav(r.id);if(v==="new")return!isCooked(r.id)&&!["breakfast","treats"].includes(r.c);return r.c===v});const rnd=x=>{const s=Math.sin(x*9301+DZ.seed*49297)*233280;return s-Math.floor(s)};L=L.map(r=>({r,st:stats(r),k:rnd(r.id)}));L.sort(DZ.useP?(a,b)=>b.st.pct-a.st.pct||a.k-b.k:(a,b)=>a.k-b.k);return L.slice(0,3)}
-function dDecide(){const P=decide();const ch=(k,v,l)=>`<button class="chip ${DZ[k]===v?"on":""}" data-a="dz" data-k="${k}" data-v="${v}">${l}</button>`;return`<div class="d-body" style="padding-top:22px"><h2 class="d-t">🤔 What are we eating?</h2>
+function dDecide(){const P=decide();const ch=(k,v,l)=>`<button class="chip ${DZ[k]===v?"on":""}" data-a="dz" data-k="${k}" data-v="${v}">${l}</button>`;return`<div class="d-body" style="padding-top:22px"><h2 class="d-t">What are we eating?</h2>
 <div class="mut small">How much time do we have?</div><div class="chips" style="margin:0;padding-left:0">${ch("time",20,"⚡ 20 min")}${ch("time",30,"30 min")}${ch("time",45,"45 min")}${ch("time",0,"All the time")}</div>
 <div class="mut small" style="margin-top:8px">What's the vibe?</div><div class="chips" style="margin:0;padding-left:0;flex-wrap:wrap">${ch("vibe","any","Anything")}${ch("vibe","cozy","🧸 Cozy")}${ch("vibe","light","🥗 Light")}${ch("vibe","soup","🍲 Soup")}${ch("vibe","fav","♥ Favorites")}${ch("vibe","new","✨ Something new")}${ch("vibe","breakfast","🍳 Breakfast")}${ch("vibe","treats","🍪 Treat")}</div>
 <label class="toggle"><span>🧺 Use what we already have</span><span class="sw"><input type="checkbox" data-ch="dzP" ${DZ.useP?"checked":""}><span></span></span></label>
