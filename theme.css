@@ -1,0 +1,22 @@
+/* Rose's EATS theme refinement: warm cream, terracotta and olive accents, SVG icons, larger touch targets.
+   Overrides the base variables in index.html; night mode keeps its own palette. */
+:root{--bg:#F7F0E4;--paper:#FFFBF4;--card:#FFFFFF;--ink:#33221C;--mut:#7D6A5F;--wine:#7A3424;--wine2:#9A4A33;--acc:#B0523A;--rose:#C9775F;--rose2:#F3DED3;--sage:#6B7A4B;--gold:#BF9A5A;--line:#E8DCCB;--shadow:0 6px 22px rgba(60,30,15,.08)}
+body.night{--acc:#E09A80;--sage:#9FB07A}
+.top{background:linear-gradient(180deg,#7A3424,#6A2C1E)}
+.ico{width:1.15em;height:1.15em;vertical-align:-.2em;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ei{display:inline-flex;align-items:center}
+.ei .ico{width:1.1em;height:1.1em}
+.tabs .i{filter:none;opacity:.8;font-size:0;line-height:0}
+.tabs .i .ico{width:24px;height:24px;stroke-width:1.7}
+.tabs button{min-height:52px;font-size:11px;letter-spacing:.01em}
+.tabs button.on .i{transform:translateY(-1px)}
+.nav-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 16px}
+.nt{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:96px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink)}
+.nt .ico{width:28px;height:28px;color:var(--acc);margin-bottom:4px}
+.nt b{font:700 17px var(--serif)}
+.nt small{color:var(--mut);font-size:12px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.nt:active{transform:scale(.98)}
+.verbox{margin-top:18px;padding:12px;border:1px solid var(--line);border-radius:12px}
+.verbox h3{margin:0 0 6px;font-size:14px}
+.btn{min-height:44px}
+.chip{min-height:40px}
